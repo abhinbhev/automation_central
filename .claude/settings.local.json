@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(/.claude/skills/office/**)",
+      "Edit(/.claude/skills/meta/**)",
+      "Edit(/.claude/skills/coding/**)"
+    ]
+  }
+}
