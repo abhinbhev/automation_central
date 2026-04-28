@@ -22,7 +22,7 @@
 
 ## Checklist
 
-- [ ] Naming follows `<domain>-<action>` convention ([naming-conventions.md](docs/naming-conventions.md))
+- [ ] Naming follows `<domain>-<action>` convention — see [README.md#naming-conventions](../README.md#naming-conventions)
 - [ ] `SKILL.md` has all required sections (if adding a skill)
 - [ ] Validator passed: `python scripts/repo/validate_skill.py <path>` (if adding a skill)
 - [ ] Catalog updated: `python scripts/repo/generate_catalog.py`
