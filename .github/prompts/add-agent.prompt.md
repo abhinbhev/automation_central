@@ -11,6 +11,7 @@ Create a new agent in `automation_central` for both Claude Code and GitHub Copil
 - **Capabilities** — bullet list of what it can do
 - **Tools** — list needed, e.g. `[read, edit, search, execute, azure-devops/*]`
 - **Boundaries** — what it must NOT do (keeps scope clear)
+- **Relevant skills** — which existing skills (by `domain/name`) apply? Scan `.claude/skills/` to suggest
 - **Target framework** — `both` (default) / `claude-only` / `copilot-only`
 
 ---
@@ -28,6 +29,9 @@ Create a new agent in `automation_central` for both Claude Code and GitHub Copil
 ---
 name: <name>
 description: <one-liner>
+skills:
+  - domain/skill-name
+  - domain/skill-name
 ---
 
 You are a [role] specialist for a cross-functional engineering team at ABI.
@@ -40,6 +44,13 @@ You are a [role] specialist for a cross-functional engineering team at ABI.
 
 ## Boundaries
 - ...
+
+## Relevant Skills
+
+Read these skill definitions at the start of every session:
+
+- `.claude/skills/domain/skill-name/SKILL.md`
+- `.claude/skills/domain/skill-name/SKILL.md`
 ```
 
 **`.github/agents/<name>.agent.md`:**
@@ -56,10 +67,19 @@ You are a [role] specialist...
 
 ## Boundaries
 ...
+
+## Relevant Skills
+
+Read these skill definitions at the start of every session:
+
+- `.claude/skills/domain/skill-name/SKILL.md`
+- `.claude/skills/domain/skill-name/SKILL.md`
 ```
 
 Both files must have:
 - Meaningful body content (capabilities + boundaries) — not just stubs
+- A `## Relevant Skills` section listing each linked skill's full path
+- Each `skills:` entry (Claude only) must resolve to a real `SKILL.md` on disk
 - No secrets or credentials
 
 ### 3. Validate both files
@@ -94,8 +114,12 @@ Output:
 - [ ] Agent name is kebab-case
 - [ ] No naming conflict with existing agents
 - [ ] `.claude/agents/<name>.agent.md` created — `name` + `description` frontmatter present
+- [ ] `.claude/agents/<name>.agent.md` has `skills:` frontmatter listing relevant skills as `domain/skill-name`
+- [ ] `.claude/agents/<name>.agent.md` has a `## Relevant Skills` body section
 - [ ] `.github/agents/<name>.agent.md` created — `description` frontmatter present
-- [ ] Both `name` values match their filename stems
+- [ ] `.github/agents/<name>.agent.md` has a `## Relevant Skills` body section mirroring the Claude agent
+- [ ] Each `skills:` entry resolves to an existing SKILL.md on disk
+- [ ] `name` matches the filename stem (Claude agent)
 - [ ] Both files have capabilities and boundaries defined
 - [ ] No secrets or credentials in either file
 - [ ] Both validators pass with 0 errors

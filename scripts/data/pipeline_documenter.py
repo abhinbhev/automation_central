@@ -15,7 +15,6 @@ Usage:
 
 import json
 import re
-import sys
 from datetime import date
 from pathlib import Path
 
@@ -110,7 +109,6 @@ def parse_generic(source_path: Path) -> dict:
 
 def render_mermaid_flow(tasks: list[dict], dependencies: list[dict]) -> str:
     lines = ["```mermaid", "flowchart LR"]
-    seen_ids = {t["id"] for t in tasks}
     for task in tasks:
         label = task.get("type", task["id"])
         lines.append(f'  {task["id"]}["{label}"]')

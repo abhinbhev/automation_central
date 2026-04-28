@@ -17,7 +17,6 @@ from pathlib import Path
 import typer
 from azure.devops.exceptions import AzureDevOpsServiceError
 from rich.console import Console
-from rich.table import Table
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.shared.auth import get_ado_connection

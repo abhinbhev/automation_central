@@ -9,6 +9,10 @@ import yaml
 from rich.console import Console
 from rich.table import Table
 
+# Rich uses Unicode glyphs (✓, ✗) — force UTF-8 stdout so cp1252 Windows shells don't crash.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 app = typer.Typer()
 console = Console()
 
@@ -75,8 +79,6 @@ def check_agent(agent_path: Path) -> list[tuple[str, str]]:
                 if not isinstance(entry, str) or "/" not in entry:
                     findings.append(("WARN", f"Skill entry '{entry}' should be in 'domain/skill-name' format"))
                     continue
-                skill_path = repo_root / ".claude" / "skills" / entry.replace("/", "/") / "SKILL.md"
-                # normalise for OS
                 skill_path = repo_root / ".claude" / "skills" / Path(entry) / "SKILL.md"
                 if not skill_path.is_file():
                     findings.append(("ERROR", f"Skill '{entry}' has no SKILL.md at {skill_path.relative_to(repo_root)}"))

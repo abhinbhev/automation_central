@@ -1,11 +1,16 @@
 """Regenerate docs/automation-catalog.md from skill and agent metadata."""
 
+import sys
 from pathlib import Path
 from typing import Any
 
 import yaml
 import typer
 from rich.console import Console
+
+# Rich uses Unicode glyphs (✓) — force UTF-8 stdout so cp1252 Windows shells don't crash.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 app = typer.Typer()
 console = Console()
