@@ -13,7 +13,7 @@ app = typer.Typer()
 console = Console()
 
 REQUIRED_FRONTMATTER = {"name", "description", "domain", "requires_script"}
-VALID_DOMAINS = {"ado", "office", "devops", "data-ml", "infra", "comms", "coding", "meta"}
+VALID_DOMAINS = {"ado", "office", "devops", "data-ml", "infra", "comms", "coding", "meta", "docs"}
 REQUIRED_SECTIONS = {"## Usage", "## Output", "## Steps"}
 SECRET_PATTERNS = [
     r"(?i)(password|passwd|secret|token|pat|api.?key)\s*=\s*['\"][^'\"]{6,}",
