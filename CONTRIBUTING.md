@@ -45,6 +45,13 @@ Branch from `main`, open a PR back to `main`, get one reviewer.
 2. Follow naming: `<domain>-<action>.prompt.md`
 3. Test in Copilot Chat before PRing
 
+## Adding a Copilot Prompt
+
+1. Add `.github/prompts/<action>.prompt.md`
+2. Follow naming: `<action>.prompt.md` (kebab-case, no domain prefix needed)
+3. Set `mode: ask` for review/analysis prompts; `mode: agent` for prompts that read/write files
+4. Test in Copilot Chat (`/` autocomplete) before opening a PR
+
 ## SKILL.md Required Sections
 
 Every `SKILL.md` must contain:
@@ -75,11 +82,11 @@ requires_script: <true|false>
 - [ ] Catalog regenerated (`generate_catalog.py`)
 - [ ] No secrets or credentials committed
 - [ ] Tested end-to-end at least once
-- [ ] `docs/automation-catalog.md` updated (via `generate_catalog.py`)
+- [ ] Catalog regenerated: `python scripts/repo/generate_catalog.py`
 
 ## Naming Conventions
 
-See [docs/naming-conventions.md](docs/naming-conventions.md) for the full reference.
+See [README.md#naming-conventions](README.md#naming-conventions) for the full reference.
 
 | Item | Convention | Example |
 |------|-----------|---------|

@@ -18,7 +18,7 @@ You are assisting a cross-functional engineering team at ABI. This repo is the t
 - `scripts/` — Python scripts called by skills when execution is needed
 - `templates/` — PowerPoint, Word, Excel, ADO, IaC templates
 - `configs/` — MCP server configs, conda environment
-- `docs/` — documentation
+- `docs/` — ADRs, runbooks, and API docs (output from doc-writer agent)
 
 ## Standards for Any Output
 
@@ -36,7 +36,7 @@ You are assisting a cross-functional engineering team at ABI. This repo is the t
 
 ## Skills Available
 
-Run `/update-catalog` to see the latest list, or browse `docs/automation-catalog.md`.
+Run `/update-catalog` to see the latest list, or check the README.md#automation-catalog section.
 
 Quick reference for the most-used skills:
 - `/meeting-minutes` — notes or transcript → structured minutes
@@ -47,3 +47,4 @@ Quick reference for the most-used skills:
 - `/code-review` — diff → SCM checklist review
 - `/plan-task` — feature description → subtasks
 - `/new-skill` — scaffold a new skill
+
