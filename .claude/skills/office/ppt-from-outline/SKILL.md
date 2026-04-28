@@ -1,6 +1,6 @@
 ---
 name: ppt-from-outline
-description: Turn a bullet-point outline into a populated PowerPoint deck using the team template
+description: Turn a bullet-point outline into an HTML presentation using an optional aesthetic template
 domain: office
 requires_script: true
 script: scripts/office/ppt_builder.py
@@ -13,11 +13,17 @@ Invoke with `/ppt-from-outline` then provide:
 - Presentation title and date
 - Target audience (team / management / exec / external)
 - Desired number of slides (optional — will be inferred from outline if not given)
-- Template to use: `team-update` (default) or `project-kickoff`
+- Template to use: name of an `.html` file in `templates/ppt/` (e.g. `team-update`). Falls back to a clean default theme.
+
+### Templates
+
+Users can place HTML or PPTX template files in `templates/ppt/`. The builder reads the `<style>` block from HTML templates as an aesthetic reference for the generated presentation. If only a `.pptx` file is provided, it will guide the user to create an HTML counterpart.
+
+Example: drop `corporate-brand.html` in `templates/ppt/` and specify `--template corporate-brand`.
 
 ## Output
 
-**Phase 1 — Slide plan (always produced):**
+**Phase 1 — Slide plan (always produced first, requires user confirmation):**
 
 For each slide:
 ```
@@ -29,9 +35,15 @@ Visual: [chart type / diagram / image suggestion / none]
 Notes: [Speaker note, 1-2 sentences]
 ```
 
-**Phase 2 — PowerPoint file (if script available):**
+Present the plan and ask the user to confirm or request changes before proceeding.
 
-Runs `scripts/office/ppt_builder.py` to produce a `.pptx` file using the template in `templates/ppt/`.
+**Phase 2 — HTML presentation (after user approval):**
+
+Runs `scripts/office/ppt_builder.py` to produce a self-contained `.html` file with:
+- Keyboard navigation (arrow keys, spacebar)
+- Slide counter and prev/next buttons
+- Print-friendly CSS (`@media print` with page breaks)
+- Template-based styling when a template is provided
 
 ## Slide Design Rules
 
@@ -48,5 +60,6 @@ Runs `scripts/office/ppt_builder.py` to produce a `.pptx` file using the templat
 2. For each group: write a title (noun phrase or question), extract 3-5 key bullets, suggest a visual
 3. Add speaker notes with context the presenter would say but not show
 4. Output the full slide plan
-5. Ask if the user wants to generate the `.pptx` file
-6. If yes, call `scripts/office/ppt_builder.py` with the slide plan as JSON input
+5. **Wait for user confirmation** — ask if they want changes before building
+6. Once confirmed, call `scripts/office/ppt_builder.py` with the slide plan as JSON input
+7. The output is a standalone `.html` file the user can open in any browser

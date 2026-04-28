@@ -12,7 +12,9 @@ from rich.table import Table
 app = typer.Typer()
 console = Console()
 
-REQUIRED_FRONTMATTER = {"name", "description"}
+# Claude agents require both; Copilot agents only need description
+CLAUDE_REQUIRED_FRONTMATTER = {"name", "description"}
+COPILOT_REQUIRED_FRONTMATTER = {"description"}
 SECRET_PATTERNS = [
     r"(?i)(password|passwd|secret|token|pat|api.?key)\s*=\s*['\"][^'\"]{6,}",
 ]
@@ -43,7 +45,11 @@ def check_agent(agent_path: Path) -> list[tuple[str, str]]:
     text = agent_path.read_text(encoding="utf-8")
     fm, body = parse_frontmatter(text)
 
-    missing_fields = REQUIRED_FRONTMATTER - set(fm.keys())
+    # Determine if this is a Copilot (.github/) or Claude (.claude/) agent
+    is_copilot = ".github" in agent_path.parts
+    required = COPILOT_REQUIRED_FRONTMATTER if is_copilot else CLAUDE_REQUIRED_FRONTMATTER
+
+    missing_fields = required - set(fm.keys())
     for field in sorted(missing_fields):
         findings.append(("ERROR", f"Frontmatter missing required field: '{field}'"))
 

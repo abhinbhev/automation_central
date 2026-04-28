@@ -11,6 +11,6 @@ applyTo: "**/*.py"
 - Type-annotate all function signatures
 - Use `pathlib.Path` not `os.path`
 - Prefer `httpx` over `requests` for HTTP calls
-- Structure scripts with a `main()` function and `if __name__ == "__main__": main()`
+- Structure scripts with a `main()` function and `if __name__ == "__main__": main()` — or `app()` when using `typer`
 - Keep functions under 40 lines; extract helpers rather than nesting logic
-- Use `pyyaml` for YAML, `openpyxl` for Excel, `python-pptx` for PPT, `python-docx` for Word
+- Use `pyyaml` for YAML, `openpyxl` for Excel, `jinja2` for HTML presentations, `python-docx` for Word

@@ -1,17 +1,20 @@
 # automation_central
 
-Central hub for the team's AI-assisted agents, skills, scripts, and templates.
+Central hub for the ABI engineering team's AI-assisted agents, skills, scripts, and templates. Supports both **Claude Code** and **GitHub Copilot** as AI frameworks, with shared Python scripts and templates underneath.
 
 ## What's here
 
 | Directory | Purpose |
 |---|---|
-| `.claude/` | Claude Code agents and skills |
-| `.github/` | GitHub Copilot agents and prompts |
-| `scripts/` | Python scripts called by skills |
-| `templates/` | PowerPoint, Word, Excel, ADO, IaC templates |
+| `.claude/agents/` | Claude Code agent modes (7 agents) |
+| `.claude/skills/` | Claude Code skills invoked with `/skill-name` (26 skills) |
+| `.github/agents/` | GitHub Copilot agent modes (7 agents) |
+| `.github/prompts/` | GitHub Copilot slash-command prompts (6 prompts) |
+| `.github/instructions/` | Scoped coding instructions (Python, ADO, Terraform) |
+| `scripts/` | Python scripts called by skills (14 scripts) |
+| `templates/` | HTML presentation templates, Word, Excel, ADO, IaC templates |
 | `configs/` | MCP server configs, conda environment |
-| `docs/` | This documentation |
+| `docs/` | Documentation, onboarding, catalog |
 
 ## Quick Start
 
@@ -35,7 +38,7 @@ Full list of all skills, agents, and scripts: [docs/automation-catalog.md](autom
 
 ## Contributing
 
-See [docs/contributing.md](contributing.md). TL;DR: branch off `main`, add your skill/agent/script, run the validator, open a PR.
+See [CONTRIBUTING.md](../CONTRIBUTING.md) or [docs/contributing.md](contributing.md). TL;DR: branch off `main`, add your skill/agent/script, run the validator, open a PR.
 
 ## Frameworks Supported
 
