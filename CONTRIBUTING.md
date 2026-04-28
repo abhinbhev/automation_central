@@ -2,6 +2,8 @@
 
 Anyone on the team can add a new automation. Here's the process.
 
+> Working with an AI agent (Claude Code, Copilot)? Point it at [`INSTRUCTIONS.md`](INSTRUCTIONS.md) first — that file holds the full operating contract (wirings, validators, file structures). This file is the human contributor's quick guide.
+
 ## Branching
 
 ```

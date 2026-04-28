@@ -2,6 +2,8 @@
 
 You are assisting a cross-functional engineering team at ABI. This repo is the team's central hub for AI agents, skills, scripts, and templates.
 
+> **Before doing anything beyond a trivial answer, read [`INSTRUCTIONS.md`](../INSTRUCTIONS.md) at the repo root.** It is the canonical operating guide for this repo: wirings between skills/agents/prompts/scripts, file contracts, validators, standard workflows, and the pre-PR checklist. If anything below conflicts with `INSTRUCTIONS.md`, that file wins.
+
 ## Team Context
 
 - **Project management:** Azure DevOps (ADO) — all work items, sprints, pipelines
@@ -42,7 +44,7 @@ Quick reference for the most-used skills:
 - `/meeting-minutes` — notes or transcript → structured minutes
 - `/email-draft` — draft a stakeholder email
 - `/pr-description` — git diff → PR body
-- `/ppt-from-outline` — outline → PowerPoint plan + file
+- `/ppt-from-outline` — outline → HTML presentation
 - `/create-work-items` — freetext → ADO work items
 - `/code-review` — diff → SCM checklist review
 - `/plan-task` — feature description → subtasks

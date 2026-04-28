@@ -9,6 +9,10 @@ import yaml
 from rich.console import Console
 from rich.table import Table
 
+# Rich uses Unicode glyphs (✓, ✗) — force UTF-8 stdout so cp1252 Windows shells don't crash.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 app = typer.Typer()
 console = Console()
 

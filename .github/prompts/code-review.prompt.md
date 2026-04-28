@@ -34,4 +34,4 @@ Check for:
 - Does the branch name follow `<type>/<description>` convention?
 - Is the commit message descriptive?
 
-Output: a prioritized list of findings (Critical / Major / Minor / Suggestion).
+Output: a prioritised list of findings grouped by severity — 🔴 BLOCK / 🟡 WARN / 🔵 NIT / 🟢 GOOD — followed by an overall recommendation (Approve / Approve with minor changes / Request changes).

@@ -30,13 +30,11 @@ Templates in templates/word/ are used as base .docx if available.
 """
 
 import json
-import sys
 from datetime import date
 from pathlib import Path
 
 import typer
 from docx import Document
-from docx.shared import Pt
 from rich.console import Console
 
 app = typer.Typer()

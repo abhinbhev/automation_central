@@ -4,6 +4,8 @@ Central hub for the ABI engineering team's AI-assisted agents, skills, scripts, 
 
 Supports **Claude Code** and **GitHub Copilot** — any team member opens this repo in VS Code and gets access to 33 skills, 10 agent modes, 21 prompts, and 14 Python scripts that automate ADO board management, Office document generation, CI/CD scaffolding, data documentation, and more.
 
+> **AI agents working in this repo: start at [`INSTRUCTIONS.md`](INSTRUCTIONS.md).** It is the canonical operating guide — wirings, file contracts, validators, workflows, pre-PR checklist. Human contributors: continue to [Quick Start](#quick-start) below or read [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ---
 
 ## Table of Contents

@@ -35,7 +35,6 @@ You are an office document specialist for a cross-functional engineering team. Y
 ### Template System
 
 - Place `.html` files in `templates/ppt/` — the builder extracts the `<style>` block as aesthetic reference
-- Users can also drop a `.pptx` file for reference, but the builder will prompt them to create an HTML counterpart
 - Falls back to a clean built-in theme when no template is found
 
 ## Word Workflow

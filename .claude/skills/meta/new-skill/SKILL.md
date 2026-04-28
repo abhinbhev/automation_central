@@ -9,7 +9,7 @@ requires_script: false
 
 Invoke with `/new-skill` then provide:
 - **Skill name** (will become the folder name and invoke command, e.g., `sprint-report`)
-- **Domain** (`ado` / `office` / `devops` / `data-ml` / `infra` / `comms` / `coding` / `meta`)
+- **Domain** (`ado` / `office` / `devops` / `data-ml` / `infra` / `comms` / `coding` / `docs` / `meta`)
 - **One-line description** of what it does
 - **Does it need a Python script?** (yes/no)
 - **What inputs does the user provide?**

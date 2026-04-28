@@ -15,7 +15,6 @@ Connection strings should be passed via environment variable SCHEMA_DB_URL, not 
 """
 
 import re
-import sys
 from pathlib import Path
 
 import typer

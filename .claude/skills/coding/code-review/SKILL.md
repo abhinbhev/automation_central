@@ -19,16 +19,16 @@ A prioritised findings list:
 ```
 ## Code Review
 
-### Critical (must fix)
+### 🔴 BLOCK (must fix before merge)
 - [file:line] [Issue description] → [Suggested fix]
 
-### Major (should fix)
+### 🟡 WARN (should fix before merge)
 - ...
 
-### Minor (fix or explain)
+### 🔵 NIT (fix or explain)
 - ...
 
-### Suggestions
+### 🟢 GOOD (positive call-outs)
 - ...
 
 ---
@@ -37,13 +37,13 @@ Recommendation: Approve / Approve with minor changes / Request changes
 
 ## Review Checklist
 
-**Critical:** secrets in code, injection vulnerabilities, logic errors causing incorrect prod behaviour, unhandled breaking changes
+**🔴 BLOCK:** secrets in code, injection vulnerabilities, logic errors causing incorrect prod behaviour, unhandled breaking changes
 
-**Major:** missing error handling at system boundaries, functions >100 lines, missing tests for new logic, hardcoded values that should be config, missing type annotations
+**🟡 WARN:** missing error handling at system boundaries, functions over 40 lines with no justification, missing tests for new logic, hardcoded values that should be config, missing type annotations
 
-**Minor:** naming convention violations, magic numbers, commented-out code, TODO without ADO item
+**🔵 NIT:** naming convention violations, magic numbers, commented-out code, TODO without ADO item
 
-**Suggestions:** readability, alternative approaches, additional test cases
+**🟢 GOOD:** good patterns worth highlighting for the team, readability improvements, well-structured tests
 
 ## Steps
 

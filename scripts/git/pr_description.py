@@ -81,7 +81,7 @@ Diff:
         output.write_text(template, encoding="utf-8")
         console.print(f"[green]Written to {output}[/green]")
     else:
-        print(template)
+        console.print(template, markup=False, highlight=False)
 
 
 if __name__ == "__main__":
