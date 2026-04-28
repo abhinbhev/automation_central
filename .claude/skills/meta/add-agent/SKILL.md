@@ -14,6 +14,7 @@ Invoke with `/add-agent` then provide:
 - **Capabilities** — bullet list of what the agent can do
 - **Tools** — list of tools the agent needs (e.g. `[read, edit, search, execute, azure-devops/*]`)
 - **Boundaries** — what the agent must NOT do (keeps scope clear, prevents overlap with other agents)
+- **Relevant skills** — which existing skills (by `domain/name`) apply to this agent? (scan `.claude/skills/`)
 - **Target framework** — `both` (default) / `claude-only` / `copilot-only`
 
 ## Output
@@ -30,6 +31,9 @@ Agent file structure:
 ---
 name: <name>
 description: <one-liner>
+skills:
+  - domain/skill-name
+  - domain/skill-name
 ---
 
 You are a [role] specialist for a cross-functional engineering team at ABI.
@@ -42,6 +46,13 @@ You are a [role] specialist for a cross-functional engineering team at ABI.
 
 ## Boundaries
 - ...
+
+## Relevant Skills
+
+Read these skill definitions at the start of every session:
+
+- `.claude/skills/domain/skill-name/SKILL.md`
+- `.claude/skills/domain/skill-name/SKILL.md`
 ```
 
 **Copilot** (`.github/agents/<name>.agent.md`):
@@ -58,6 +69,13 @@ You are a [role] specialist...
 
 ## Boundaries
 ...
+
+## Relevant Skills
+
+Read these skill definitions at the start of every session:
+
+- `.claude/skills/domain/skill-name/SKILL.md`
+- `.claude/skills/domain/skill-name/SKILL.md`
 ```
 
 ## Steps
@@ -65,23 +83,33 @@ You are a [role] specialist...
 1. Collect all required details — ask for any that are missing
 2. Check the name is `kebab-case` (lowercase, hyphens only, no underscores)
 3. Check for naming conflicts: scan `.claude/agents/` and `.github/agents/` for existing files
-4. Write `.claude/agents/<name>.agent.md` — body must be >50 chars with capabilities and boundaries
-5. Write `.github/agents/<name>.agent.md` — same content, adapted for Copilot frontmatter schema
-6. Run `python scripts/repo/validate_agent.py .claude/agents/<name>.agent.md`
-7. Run `python scripts/repo/validate_agent.py .github/agents/<name>.agent.md`
-8. If either validator reports errors → fix them and re-run until **both pass**
-9. Run `python scripts/repo/generate_catalog.py`
-10. Ask: "Should I create matching skills or Copilot prompts for this agent?"
-11. Report: paths created, both validator results, catalog item count
+4. Ask which existing skills are relevant — scan `.claude/skills/<domain>/` for each applicable domain
+5. Write `.claude/agents/<name>.agent.md`:
+   - `skills:` frontmatter listing each relevant skill as `domain/skill-name`
+   - Body with capabilities, workflow, and boundaries (>50 chars)
+   - `## Relevant Skills` section listing each skill's SKILL.md path
+6. Write `.github/agents/<name>.agent.md`:
+   - Same content adapted for Copilot frontmatter schema (no `skills:` in frontmatter)
+   - `## Relevant Skills` section mirroring the Claude agent
+7. Run `python scripts/repo/validate_agent.py .claude/agents/<name>.agent.md`
+8. Run `python scripts/repo/validate_agent.py .github/agents/<name>.agent.md`
+9. If either validator reports errors → fix them and re-run until **both pass**
+10. Run `python scripts/repo/generate_catalog.py`
+11. Ask: "Should I create new skills or Copilot prompts for this agent?"
+12. Report: paths created, both validator results, catalog item count
 
 ## Validation Checklist (enforced before completing)
 
 - [ ] Agent name is kebab-case
 - [ ] No naming conflict with existing agents
 - [ ] `.claude/agents/<name>.agent.md` created with `name` + `description` frontmatter
+- [ ] `.claude/agents/<name>.agent.md` has `skills:` frontmatter listing relevant skills as `domain/skill-name`
+- [ ] `.claude/agents/<name>.agent.md` has `## Relevant Skills` body section
 - [ ] `.github/agents/<name>.agent.md` created with `description` frontmatter
+- [ ] `.github/agents/<name>.agent.md` has `## Relevant Skills` body section
 - [ ] Both `name` values match their filename stems
 - [ ] Both files have meaningful body content (capabilities + boundaries)
+- [ ] Each `skills:` entry resolves to an existing SKILL.md on disk
 - [ ] No secrets or credentials in either file
 - [ ] Both validators pass with 0 errors
 - [ ] Catalog regenerated after creation

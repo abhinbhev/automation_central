@@ -34,15 +34,6 @@ Supports **Claude Code** and **GitHub Copilot** — any team member opens this r
   - [doc-writer](#doc-writer-1)
   - [agent-skill-manager](#agent-skill-manager-1)
 - [Automation Catalog](#automation-catalog)
-  - [ADO Board Management](#ado-board-management)
-  - [Office Documents](#office-documents)
-  - [Communication](#communication)
-  - [DevOps / CI-CD](#devops--ci-cd)
-  - [Infrastructure](#infrastructure)
-  - [Data / ML](#data--ml)
-  - [Coding](#coding)
-  - [Documentation](#documentation)
-  - [Meta (Repo Management)](#meta-repo-management)
 - [Naming Conventions](#naming-conventions)
 - [MCP Server Reference](#mcp-server-reference)
 - [Environment Variables](#environment-variables)
@@ -640,89 +631,41 @@ python scripts/repo/validate_skill.py .claude/skills/meta/add-skill
 python scripts/repo/validate_agent.py .claude/agents/agent-skill-manager.agent.md
 ```
 
+**Audit skill utilization** (confirm every skill is referenced by at least one agent):
+```bash
+# Cross-reference .claude/skills/ against skills: frontmatter in .claude/agents/
+# All 33 skills should be referenced — validate_agent.py warns on missing skills: frontmatter
+python scripts/repo/generate_catalog.py
+```
+
 No external API or credentials required. The validators only read local files.
 
 ---
 
 ## Automation Catalog
 
-### ADO Board Management
+The full catalog is auto-generated and lives at [`docs/automation-catalog.md`](docs/automation-catalog.md).
 
-| Skill | Description | Has Script |
-|-------|-------------|-----------|
-| `/create-work-items` | Freetext → ADO work items (single or bulk) | ✅ `create_work_items.py` |
-| `/sprint-planning` | Plan and populate a sprint from the backlog | — (MCP) |
-| `/release-notes` | Closed items → stakeholder or internal release notes | ✅ `release_notes.py` |
-| `/pr-linker` | Link GitHub PRs to ADO items via `AB#ID` tags | — (MCP) |
+It is rebuilt automatically by running:
+```bash
+python scripts/repo/generate_catalog.py
+```
 
-### Office Documents
+**Quick reference — skills by domain:**
 
-| Skill | Description | Has Script |
-|-------|-------------|-----------|
-| `/ppt-from-outline` | Bullet outline → slide plan → `.html` presentation | ✅ `ppt_builder.py` |
-| `/word-doc` | SOPs, ADRs, specs, RCA, reports → `.docx` file | ✅ `word_builder.py` |
-| `/excel-report` | Data → formatted `.xlsx` with charts and conditional formatting | ✅ `excel_builder.py` |
+| Domain | Skills |
+|--------|--------|
+| ADO | `/create-work-items`, `/sprint-planning`, `/release-notes`, `/pr-linker` |
+| Office | `/ppt-from-outline`, `/word-doc`, `/excel-report` |
+| Communication | `/meeting-minutes`, `/email-draft`, `/teams-announcement` |
+| DevOps / CI-CD | `/pr-description`, `/commit-message`, `/ado-pipeline-yaml`, `/gh-actions-workflow` |
+| Coding | `/plan-task`, `/code-review`, `/write-tests` |
+| Data / ML | `/schema-docs`, `/pipeline-docs`, `/model-card` |
+| Infrastructure | `/terraform-module`, `/arch-diagram`, `/incident-runbook` |
+| Documentation | `/write-readme`, `/write-adr`, `/write-runbook`, `/write-api-docs` |
+| Meta | `/add-skill`, `/add-agent`, `/new-skill`, `/new-agent`, `/validate-skill`, `/update-catalog` |
 
-### Communication
-
-| Skill | Description |
-|-------|-------------|
-| `/meeting-minutes` | Transcript or notes → structured minutes with action items |
-| `/email-draft` | Draft a stakeholder email |
-| `/teams-announcement` | Sprint updates, release comms, incident resolved |
-
-### DevOps / CI-CD
-
-| Skill | Description |
-|-------|-------------|
-| `/pr-description` | Git diff → PR body (has script: `pr_description.py`) |
-| `/commit-message` | Staged diff → conventional commit message (`feat`, `fix`, `chore`, etc.) |
-| `/ado-pipeline-yaml` | Generate `azure-pipelines.yml` for any stack |
-| `/gh-actions-workflow` | Generate GitHub Actions workflow YAML |
-
-### Infrastructure
-
-| Skill | Description |
-|-------|-------------|
-| `/terraform-module` | Scaffold a complete Terraform module |
-| `/arch-diagram` | Generate Mermaid architecture diagrams (C4, sequence, deployment) |
-| `/incident-runbook` | Structured operational runbook |
-
-### Data / ML
-
-| Skill | Description | Has Script |
-|-------|-------------|-----------|
-| `/schema-docs` | DDL or live DB → schema Markdown + Mermaid ER diagram | ✅ `schema_documenter.py` |
-| `/pipeline-docs` | Airflow/ADF/dbt config → pipeline documentation | ✅ `pipeline_documenter.py` |
-| `/model-card` | ML model → model card with metrics, limitations, responsible AI |
-
-### Coding
-
-| Skill | Description |
-|-------|-------------|
-| `/plan-task` | Feature → decomposed subtasks with acceptance criteria |
-| `/code-review` | Code → review findings by severity (BLOCK/WARN/NIT) |
-| `/write-tests` | Code → pytest test suite |
-
-### Documentation
-
-| Skill | Description |
-|-------|-------------|
-| `/write-readme` | Codebase path or description → complete README |
-| `/write-adr` | Decision description → Architecture Decision Record |
-| `/write-runbook` | Service description → operational runbook (diagnosis, remediation, escalation) |
-| `/write-api-docs` | Source code or OpenAPI spec → API reference documentation |
-
-### Meta (Repo Management)
-
-| Skill | Description |
-|-------|-------------|
-| `/add-skill` | Create + validate + register a new skill (runs validator, updates catalog) |
-| `/add-agent` | Create + validate both Claude and Copilot agent files, updates catalog |
-| `/new-skill` | Scaffold a new SKILL.md stub (no validation) |
-| `/new-agent` | Scaffold a new .agent.md stub (no validation) |
-| `/validate-skill` | Check a skill folder against repo standards |
-| `/update-catalog` | Regenerate the automation catalog |
+For full descriptions, script paths, agents, and Copilot prompts → see [`docs/automation-catalog.md`](docs/automation-catalog.md).
 
 ---
 
@@ -822,9 +765,10 @@ Open this repo in VS Code and you can ask your AI assistant to:
 | AI frameworks | Claude Code + GitHub Copilot | Team uses both; shared scripts ensure feature parity |
 | Skills location | `.claude/skills/<domain>/<name>/` | Claude Code standard; domain grouping keeps it navigable |
 | Copilot equivalent | `.github/prompts/` + `.github/agents/` | Copilot uses prompts (no native skills) + agent modes |
+| Skills → agents | `skills:` frontmatter + `## Relevant Skills` body section | Each agent loads the SKILL.md files it needs at session start; both Claude and Copilot agents include this section since SKILL.md is readable markdown |
 | Scripts | Python in `scripts/` | Framework-agnostic; called by skills when execution > text |
 | MCP strategy | Local-first, remote path documented | No shared server yet; designed for easy migration |
 | Catalog | Auto-generated via `generate_catalog.py` | Prevents drift as skills accumulate |
-| Contribution | PR + validator gate + 1 reviewer | Low friction; `validate_skill.py` catches structural issues |
+| Contribution | PR + validator gate + 1 reviewer | Low friction; `validate_skill.py` and `validate_agent.py` catch structural issues |
 | Tag convention | `snake_case` (`environment`, `team`, `managed_by`) | Consistent with Terraform HCL conventions |
 | Presentations | HTML (not `.pptx`) | Self-contained, no binary deps, template-driven CSS, opens in any browser |

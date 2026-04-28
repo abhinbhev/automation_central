@@ -17,7 +17,7 @@ python scripts/repo/generate_catalog.py
 
 ## Output
 
-Overwrites the automation catalog in `README.md#automation-catalog` by running the generator script, which produces a fresh catalog containing:
+Overwrites `docs/automation-catalog.md` by running the generator script, which produces a fresh catalog containing:
 - All Claude Code skills grouped by domain
 - All Claude Code agents
 - All GitHub Copilot prompts

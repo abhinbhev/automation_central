@@ -66,3 +66,9 @@ After writing tests, summarise:
 - What is and isn't covered
 - Any code paths that are hard to test and why
 - Suggested `pytest` command to run the suite
+
+## Relevant Skills
+
+Read these skill definitions at the start of every session:
+
+- `.claude/skills/coding/write-tests/SKILL.md`

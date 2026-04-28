@@ -31,19 +31,22 @@ Branch from `main`, open a PR back to `main`, get one reviewer.
    ```
 6. Open a PR — fill in the PR template
 
-## Adding an Agent (Claude Code)
+## Adding an Agent (Claude Code + Copilot)
 
-1. Add `.claude/agents/<name>.agent.md`
-2. Use `/new-agent` skill to scaffold, or copy an existing agent as reference
-3. Run: `python scripts/repo/validate_agent.py .claude/agents/<name>.agent.md`
-4. Add matching Copilot version to `.github/agents/<name>.agent.md` if applicable
-5. Open a PR
-
-## Adding a Copilot Prompt
-
-1. Add `.github/prompts/<name>.prompt.md`
-2. Follow naming: `<domain>-<action>.prompt.md`
-3. Test in Copilot Chat before PRing
+1. Add **both** files simultaneously:
+   - `.claude/agents/<name>.agent.md` — frontmatter: `name`, `description`, `skills: [domain/name, ...]`
+   - `.github/agents/<name>.agent.md` — frontmatter: `description`, `tools: [...]`
+2. Use `/add-agent` skill to scaffold (handles both files, skills linking, validation), or copy an existing agent as reference
+3. Identify relevant skills by scanning `.claude/skills/<domain>/` — add them to:
+   - `skills:` frontmatter in the Claude agent (format: `domain/skill-name`)
+   - `## Relevant Skills` section in **both** agent files (full SKILL.md paths)
+4. Run validators on both files:
+   ```bash
+   python scripts/repo/validate_agent.py .claude/agents/<name>.agent.md
+   python scripts/repo/validate_agent.py .github/agents/<name>.agent.md
+   ```
+5. Regenerate catalog: `python scripts/repo/generate_catalog.py`
+6. Open a PR
 
 ## Adding a Copilot Prompt
 
@@ -51,6 +54,52 @@ Branch from `main`, open a PR back to `main`, get one reviewer.
 2. Follow naming: `<action>.prompt.md` (kebab-case, no domain prefix needed)
 3. Set `mode: ask` for review/analysis prompts; `mode: agent` for prompts that read/write files
 4. Test in Copilot Chat (`/` autocomplete) before opening a PR
+
+## Agent Required Structure
+
+Every `.agent.md` pair must contain:
+
+**Claude Code** (`.claude/agents/<name>.agent.md`):
+```markdown
+---
+name: <name>                   # matches filename stem
+description: <one-liner>
+skills:                        # list relevant skills as domain/skill-name
+  - ado/create-work-items
+---
+
+## Capabilities
+...
+
+## Boundaries
+...
+
+## Relevant Skills
+
+Read these skill definitions at the start of every session:
+
+- `.claude/skills/ado/create-work-items/SKILL.md`
+```
+
+**Copilot** (`.github/agents/<name>.agent.md`):
+```markdown
+---
+description: <one-liner>
+tools: [read, edit, ...]
+---
+
+## Capabilities
+...
+
+## Boundaries
+...
+
+## Relevant Skills
+
+Read these skill definitions at the start of every session:
+
+- `.claude/skills/ado/create-work-items/SKILL.md`
+```
 
 ## SKILL.md Required Sections
 
@@ -76,13 +125,14 @@ requires_script: <true|false>
 
 ## PR Checklist
 
-- [ ] Skill/agent follows naming conventions (`<domain>-<action>`)
+- [ ] Skill/agent follows naming conventions (kebab-case)
 - [ ] `SKILL.md` has all required sections
+- [ ] Agent has `skills:` frontmatter and `## Relevant Skills` section in both `.claude/` and `.github/` files
+- [ ] Each `skills:` entry resolves to a real SKILL.md on disk
 - [ ] Validator passes (`validate_skill.py` or `validate_agent.py`)
 - [ ] Catalog regenerated (`generate_catalog.py`)
 - [ ] No secrets or credentials committed
 - [ ] Tested end-to-end at least once
-- [ ] Catalog regenerated: `python scripts/repo/generate_catalog.py`
 
 ## Naming Conventions
 
