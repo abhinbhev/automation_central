@@ -2,7 +2,7 @@
 
 Central hub for the ABI engineering team's AI-assisted agents, skills, scripts, and templates.
 
-Supports **Claude Code** and **GitHub Copilot** — any team member opens this repo in VS Code and gets access to 26 skills, 8 agent modes, 6 prompts, and 14 Python scripts that automate ADO board management, Office document generation, CI/CD scaffolding, data documentation, and more.
+Supports **Claude Code** and **GitHub Copilot** — any team member opens this repo in VS Code and gets access to 33 skills, 10 agent modes, 21 prompts, and 14 Python scripts that automate ADO board management, Office document generation, CI/CD scaffolding, data documentation, and more.
 
 ---
 
@@ -32,6 +32,7 @@ Supports **Claude Code** and **GitHub Copilot** — any team member opens this r
   - [code-reviewer](#code-reviewer-1)
   - [planner](#planner-1)
   - [doc-writer](#doc-writer-1)
+  - [agent-skill-manager](#agent-skill-manager-1)
 - [Automation Catalog](#automation-catalog)
   - [ADO Board Management](#ado-board-management)
   - [Office Documents](#office-documents)
@@ -40,6 +41,7 @@ Supports **Claude Code** and **GitHub Copilot** — any team member opens this r
   - [Infrastructure](#infrastructure)
   - [Data / ML](#data--ml)
   - [Coding](#coding)
+  - [Documentation](#documentation)
   - [Meta (Repo Management)](#meta-repo-management)
 - [Naming Conventions](#naming-conventions)
 - [MCP Server Reference](#mcp-server-reference)
@@ -62,7 +64,7 @@ code .
 conda env create -f configs/envs/conda-env.yml
 conda activate automation-central
 
-# 3. MCP servers (follow configs/mcp/local/README.md for auth)
+# 3. MCP servers local (optional, follow configs/mcp/local/README.md for auth)
 npm install -g @modelcontextprotocol/server-azure-devops
 npm install -g @modelcontextprotocol/server-github
 npm install -g @modelcontextprotocol/server-msgraph
@@ -253,28 +255,31 @@ See `configs/mcp/local/README.md` for the full guide and a template JSON you can
 automation_central/
 ├── .claude/
 │   ├── CLAUDE.md                          ← project-level instructions for Claude Code
-│   ├── agents/                            ← 8 Claude Code agent modes
+│   ├── agents/                            ← 10 Claude Code agent modes
 │   │   ├── ado-manager.agent.md
+│   │   ├── agent-skill-manager.agent.md
 │   │   ├── code-reviewer.agent.md
 │   │   ├── coder.agent.md
 │   │   ├── devops-engineer.agent.md
+│   │   ├── doc-writer.agent.md
 │   │   ├── github-manager.agent.md
 │   │   ├── office-writer.agent.md
 │   │   ├── planner.agent.md
 │   │   └── tester.agent.md
-│   └── skills/                            ← 26 skills, grouped by domain
+│   └── skills/                            ← 33 skills, grouped by domain
 │       ├── ado/                           ← ADO board management
 │       ├── coding/                        ← code review, planning, testing
 │       ├── comms/                         ← email, meetings, Teams
 │       ├── data-ml/                       ← schema docs, pipeline docs, model cards
-│       ├── devops/                        ← CI/CD, PR descriptions
+│       ├── devops/                        ← CI/CD, PR descriptions, commit messages
+│       ├── docs/                          ← READMEs, ADRs, runbooks, API docs
 │       ├── infra/                         ← Terraform, arch diagrams, runbooks
-│       ├── meta/                          ← repo management (new-skill, new-agent, etc.)
+│       ├── meta/                          ← repo management (add-skill, add-agent, validate, catalog)
 │       └── office/                        ← HTML presentations, Word, Excel
 ├── .github/
 │   ├── copilot-instructions.md            ← team context for GitHub Copilot
-│   ├── agents/                            ← 8 Copilot agent modes
-│   ├── prompts/                           ← 6 Copilot slash-command prompts
+│   ├── agents/                            ← 10 Copilot agent modes
+│   ├── prompts/                           ← 21 Copilot slash-command prompts
 │   ├── instructions/                      ← scoped coding instructions (Python, ADO, Terraform)
 │   └── pull_request_template.md
 ├── scripts/
@@ -329,14 +334,51 @@ Claude will produce structured meeting minutes with attendees, decisions, and ac
 Prompts appear in Copilot Chat when you type `/`. They work similarly to skills but are designed for the Copilot interface.
 
 **Available prompts:**
+
+**ADO & Planning**
 | Command | What it does |
 |---------|-------------|
-| `/create-work-items` | Parse a description → structured ADO work items |
-| `/ppt-from-outline` | Bullet outline → HTML presentation |
-| `/pr-description` | Git diff → PR body |
-| `/release-notes` | Sprint → release notes |
-| `/code-review` | Diff → review findings |
+| `/create-work-items` | Description → structured ADO work items |
+| `/plan-sprint` | Pull backlog items → draft sprint plan |
+| `/decompose-feature` | Feature description → estimable backlog |
+| `/release-notes` | Sprint items → stakeholder release notes |
+
+**Code & DevOps**
+| Command | What it does |
+|---------|-------------|
+| `/code-review` | Diff → review findings by severity |
 | `/write-tests` | Code → pytest test suite |
+| `/implement-feature` | Task → coded implementation |
+| `/commit-message` | Staged diff → conventional commit message |
+| `/pr-description` | Git diff → PR body |
+| `/scaffold-pipeline` | Requirements → GitHub Actions or Azure Pipelines YAML |
+| `/scaffold-terraform` | Requirements → Terraform module (`main.tf`, `variables.tf`, `outputs.tf`, `versions.tf`) |
+
+**Documentation**
+| Command | What it does |
+|---------|-------------|
+| `/write-readme` | Codebase path → complete README |
+| `/write-adr` | Decision description → ADR |
+| `/write-runbook` | Service description → operational runbook |
+| `/write-api-docs` | Source code / OpenAPI spec → API reference |
+| `/write-word-doc` | Outline → Word document (SOP, ADR, RCA, spec) |
+
+**GitHub**
+| Command | What it does |
+|---------|-------------|
+| `/triage-issues` | Freetext → structured GitHub issues |
+
+**Office**
+| Command | What it does |
+|---------|-------------|
+| `/ppt-from-outline` | Bullet outline → HTML presentation |
+| `/build-excel-report` | Description → formatted `.xlsx` |
+
+**Repo Management**
+| Command | What it does |
+|---------|-------------|
+| `/add-skill` | Create + validate + register a new Claude Code skill |
+| `/add-agent` | Create + validate + register agent files for both frameworks |
 
 ### Agent Modes
 
@@ -345,6 +387,7 @@ Both Claude Code and Copilot support specialized agent modes. Select them from t
 | Agent | Use when |
 |-------|---------|
 | `ado-manager` | Creating/querying ADO work items, sprint planning, release notes |
+| `agent-skill-manager` | Creating, validating, and registering new skills and agents |
 | `github-manager` | PRs, issues, repo management, branch policies, GitHub Actions |
 | `office-writer` | Generating HTML presentations, Word, or Excel documents |
 | `planner` | Breaking features/epics into subtasks with acceptance criteria |
@@ -353,8 +396,6 @@ Both Claude Code and Copilot support specialized agent modes. Select them from t
 | `code-reviewer` | Reviewing diffs against the team checklist |
 | `devops-engineer` | CI/CD pipelines, Terraform modules, architecture diagrams |
 | `doc-writer` | READMEs, ADRs, runbooks, API docs, changelogs |
-| `data-documenter` | Schema docs, pipeline docs, ML model cards |
-| `meta-builder` | Scaffolding new skills/agents, validating, updating the catalog |
 
 ### Python Scripts
 
@@ -402,6 +443,7 @@ Each agent has different external dependencies. Install only what you need for t
 | `code-reviewer` | — | `git` | — | `git diff` to produce diffs for review |
 | `planner` | — | — | — | No external deps; optionally chains to `ado-manager` |
 | `doc-writer` | — | — | — | No external deps; reads codebase, writes Markdown |
+| `agent-skill-manager` | — | — | — | Needs conda env to run `validate_skill.py` and `validate_agent.py` |
 
 ---
 
@@ -582,6 +624,26 @@ Works best when pointed at a file path — it reads the source and cross-checks 
 
 ---
 
+### `agent-skill-manager`
+
+Creates and validates new skills and agents. Requires the conda environment to run the validator scripts.
+
+**Setup** (same conda env as `coder`):
+```bash
+conda env create -f configs/envs/conda-env.yml
+conda activate automation-central
+```
+
+**Verify validators work:**
+```bash
+python scripts/repo/validate_skill.py .claude/skills/meta/add-skill
+python scripts/repo/validate_agent.py .claude/agents/agent-skill-manager.agent.md
+```
+
+No external API or credentials required. The validators only read local files.
+
+---
+
 ## Automation Catalog
 
 ### ADO Board Management
@@ -614,6 +676,7 @@ Works best when pointed at a file path — it reads the source and cross-checks 
 | Skill | Description |
 |-------|-------------|
 | `/pr-description` | Git diff → PR body (has script: `pr_description.py`) |
+| `/commit-message` | Staged diff → conventional commit message (`feat`, `fix`, `chore`, etc.) |
 | `/ado-pipeline-yaml` | Generate `azure-pipelines.yml` for any stack |
 | `/gh-actions-workflow` | Generate GitHub Actions workflow YAML |
 
@@ -641,13 +704,24 @@ Works best when pointed at a file path — it reads the source and cross-checks 
 | `/code-review` | Code → review findings by severity (BLOCK/WARN/NIT) |
 | `/write-tests` | Code → pytest test suite |
 
+### Documentation
+
+| Skill | Description |
+|-------|-------------|
+| `/write-readme` | Codebase path or description → complete README |
+| `/write-adr` | Decision description → Architecture Decision Record |
+| `/write-runbook` | Service description → operational runbook (diagnosis, remediation, escalation) |
+| `/write-api-docs` | Source code or OpenAPI spec → API reference documentation |
+
 ### Meta (Repo Management)
 
 | Skill | Description |
 |-------|-------------|
-| `/new-skill` | Scaffold a new SKILL.md with correct structure |
-| `/new-agent` | Scaffold a new .agent.md file |
-| `/validate-skill` | Check a skill against repo standards |
+| `/add-skill` | Create + validate + register a new skill (runs validator, updates catalog) |
+| `/add-agent` | Create + validate both Claude and Copilot agent files, updates catalog |
+| `/new-skill` | Scaffold a new SKILL.md stub (no validation) |
+| `/new-agent` | Scaffold a new .agent.md stub (no validation) |
+| `/validate-skill` | Check a skill folder against repo standards |
 | `/update-catalog` | Regenerate the automation catalog |
 
 ---
