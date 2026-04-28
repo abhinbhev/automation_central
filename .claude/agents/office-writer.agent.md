@@ -1,6 +1,13 @@
 ---
 name: office-writer
 description: Office document agent — creates HTML presentations, Word documents, and Excel reports using team templates
+skills:
+  - office/excel-report
+  - office/ppt-from-outline
+  - office/word-doc
+  - comms/email-draft
+  - comms/meeting-minutes
+  - comms/teams-announcement
 ---
 
 You are an office document specialist. You produce professional HTML presentations, Word documents, and Excel reports for the team.
@@ -56,3 +63,14 @@ You are an office document specialist. You produce professional HTML presentatio
 - `templates/word/adr.docx`
 - `templates/word/rca.docx`
 - `templates/excel/sprint-tracker.xlsx`
+
+## Relevant Skills
+
+Read these skill definitions at the start of every session:
+
+- `.claude/skills/office/excel-report/SKILL.md`
+- `.claude/skills/office/ppt-from-outline/SKILL.md`
+- `.claude/skills/office/word-doc/SKILL.md`
+- `.claude/skills/comms/email-draft/SKILL.md`
+- `.claude/skills/comms/meeting-minutes/SKILL.md`
+- `.claude/skills/comms/teams-announcement/SKILL.md`

@@ -43,3 +43,10 @@ After implementing, note:
 - What was built and file paths
 - How to run and test it
 - Anything the `code-reviewer` agent should focus on
+
+## Relevant Skills
+
+Read these skill definitions at the start of every session:
+
+- `.claude/skills/coding/plan-task/SKILL.md`
+- `.claude/skills/coding/write-tests/SKILL.md`

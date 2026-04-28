@@ -10,7 +10,7 @@ Supports both **Claude Code** and **GitHub Copilot** as AI frameworks, with shar
 
 ---
 
-## Status: Skills + Scripts + Agents Complete — Audit Passed
+## Status: Expanded — Agents, Skills, Prompts, and Docs Domain Added
 
 ### Done — Foundation (Phase 0)
 
@@ -19,9 +19,9 @@ Supports both **Claude Code** and **GitHub Copilot** as AI frameworks, with shar
 | Repo structure | All folders created | See tree below |
 | `.claude/CLAUDE.md` | ✅ | Project instructions for Claude Code |
 | `.github/copilot-instructions.md` | ✅ | Team base context for Copilot |
-| **Agents (Claude Code)** | 7 × `.agent.md` | planner, coder, code-reviewer, tester, ado-manager, office-writer, devops-engineer |
-| **Agents (Copilot)** | 7 × `.agent.md` | ✅ ado-manager, office-writer, devops-engineer, planner, coder, tester, code-reviewer |
-| **Copilot prompts** | 6 × `.prompt.md` | create-work-items, ppt-from-outline, pr-description, release-notes, code-review, write-tests |
+| **Agents (Claude Code)** | 10 × `.agent.md` | planner, coder, code-reviewer, tester, ado-manager, office-writer, devops-engineer, doc-writer, github-manager, agent-skill-manager |
+| **Agents (Copilot)** | 10 × `.agent.md` | planner, coder, code-reviewer, tester, ado-manager, office-writer, devops-engineer, doc-writer, github-manager, agent-skill-manager |
+| **Copilot prompts** | 21 × `.prompt.md` | create-work-items, ppt-from-outline, pr-description, release-notes, code-review, write-tests, add-agent, add-skill, build-excel-report, commit-message, decompose-feature, implement-feature, plan-sprint, scaffold-pipeline, scaffold-terraform, triage-issues, write-adr, write-api-docs, write-readme, write-runbook, write-word-doc |
 | **Copilot instructions** | 3 × `.instructions.md` | python, ado, terraform |
 | PR template | ✅ | `.github/pull_request_template.md` |
 | `configs/mcp/` | ✅ | Local + remote setup documented |
@@ -30,18 +30,19 @@ Supports both **Claude Code** and **GitHub Copilot** as AI frameworks, with shar
 | `.vscode/` | ✅ | settings.json + extensions.json |
 | `.gitignore` | ✅ | |
 
-### Done — Skills (26 total SKILL.md files)
+### Done — Skills (33 total SKILL.md files)
 
 | Domain | Skills | Status |
 |---|---|---|
 | `coding` | plan-task, code-review, write-tests | ✅ Phase 0 |
 | `comms` | meeting-minutes, email-draft, teams-announcement | ✅ All done |
-| `devops` | pr-description, ado-pipeline-yaml, gh-actions-workflow | ✅ All done |
-| `meta` | new-skill, new-agent, validate-skill, update-catalog | ✅ Phase 0 |
+| `devops` | pr-description, ado-pipeline-yaml, gh-actions-workflow, commit-message | ✅ All done |
+| `meta` | new-skill, new-agent, validate-skill, update-catalog, add-skill, add-agent | ✅ All done |
 | `office` | ppt-from-outline, word-doc, excel-report | ✅ All done |
 | `ado` | create-work-items, sprint-planning, release-notes, pr-linker | ✅ All done |
 | `data-ml` | schema-docs, pipeline-docs, model-card | ✅ All done |
 | `infra` | terraform-module, arch-diagram, incident-runbook | ✅ All done |
+| `docs` | write-readme, write-adr, write-api-docs, write-runbook | ✅ All done |
 
 ### Done — Python Scripts (14 total)
 
@@ -97,26 +98,36 @@ Replaced `.pptx` generation (`python-pptx`) with self-contained HTML presentatio
 | `CONTRIBUTING.md` | Created: extracted from README, full contribution guide at repo root |
 | `README.md` | Updated: HTML presentations, new "What Can You Do?" section, contributing link |
 
-### Done — Root README.md
+### Done — Phase 1 Expansion
 
-Comprehensive `README.md` created at repo root covering: overview, prerequisites, full setup (conda, MCP, env vars, verification), repo structure, how to use (skills, prompts, agents, scripts), full automation catalog by domain, MCP server reference, env vars reference, contributing workflow, naming conventions, and architecture decisions.
+| Area | Detail |
+|------|--------|
+| **3 new agents (both frameworks)** | `doc-writer` — documentation specialist; `github-manager` — PR/issue/repo operations; `agent-skill-manager` — scaffold, validate, and manage skills/agents. Now 10 agents per framework |
+| **New `docs` skill domain** | 4 skills: `write-readme`, `write-adr`, `write-api-docs`, `write-runbook`. Paired with `doc-writer` agent |
+| **`devops/commit-message` skill** | New skill: generate conventional commit messages from staged diff |
+| **`meta/add-skill` + `meta/add-agent`** | New scaffolding skills alongside existing `new-skill`/`new-agent` (Claude Code variants) |
+| **15 new Copilot prompts** | add-agent, add-skill, build-excel-report, commit-message, decompose-feature, implement-feature, plan-sprint, scaffold-pipeline, scaffold-terraform, triage-issues, write-adr, write-api-docs, write-readme, write-runbook, write-word-doc. Total: 21 |
+| **IAC template folders** | `templates/iac/terraform-module/` and `templates/iac/gh-actions/` created (previously listed as remaining) |
+
+### Done — Root README.mdcovering: overview, prerequisites, full setup (conda, MCP, env vars, verification), repo structure, how to use (skills, prompts, agents, scripts), full automation catalog by domain, MCP server reference, env vars reference, contributing workflow, naming conventions, and architecture decisions.
 
 `docs/README.md` updated to match (brief quickstart version with links to full docs).
 
 ---
 
-### Remaining: Templates
+### Remaining: Templates (binary files)
 
 Folder: `templates/`
 Word and Excel templates require actual binary files (branded `.docx`, `.xlsx` bases). The scripts fall back to blank documents when templates are missing, so this is non-blocking.
 Presentation templates are `.html` files — `team-update.html` is already provided.
+IAC template folder structure exists; starter file content still pending.
 
 - `ppt/team-update.html` ✅ (provided)
 - `ppt/project-kickoff.html` (create when needed)
 - `word/sop.docx`, `word/adr.docx`, `word/rca.docx`
 - `excel/sprint-tracker.xlsx`
-- `iac/terraform-module/` starter files
-- `iac/gh-actions/` reusable workflow YAMLs
+- `iac/terraform-module/` ✅ folder exists — starter `.tf` files pending
+- `iac/gh-actions/` ✅ folder exists — reusable workflow YAMLs pending
 
 ---
 

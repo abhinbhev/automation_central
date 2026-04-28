@@ -61,6 +61,34 @@ def check_agent(agent_path: Path) -> list[tuple[str, str]]:
     if len(body.strip()) < 50:
         findings.append(("WARN", "Agent body is very short — consider adding capabilities and boundaries"))
 
+    if not is_copilot and "skills" in fm:
+        skills = fm["skills"]
+        if not isinstance(skills, list):
+            findings.append(("ERROR", "Frontmatter 'skills' must be a list of domain/skill-name strings"))
+        else:
+            repo_root = agent_path
+            for _ in range(10):  # walk up to find repo root (.claude dir)
+                repo_root = repo_root.parent
+                if (repo_root / ".claude" / "skills").is_dir():
+                    break
+            for entry in skills:
+                if not isinstance(entry, str) or "/" not in entry:
+                    findings.append(("WARN", f"Skill entry '{entry}' should be in 'domain/skill-name' format"))
+                    continue
+                skill_path = repo_root / ".claude" / "skills" / entry.replace("/", "/") / "SKILL.md"
+                # normalise for OS
+                skill_path = repo_root / ".claude" / "skills" / Path(entry) / "SKILL.md"
+                if not skill_path.is_file():
+                    findings.append(("ERROR", f"Skill '{entry}' has no SKILL.md at {skill_path.relative_to(repo_root)}"))
+    elif not is_copilot and "skills" not in fm:
+        findings.append(("WARN", "Claude agent has no 'skills:' frontmatter — add relevant skills or set skills: [] if none apply"))
+
+    if not is_copilot and "## Relevant Skills" not in body:
+        findings.append(("WARN", "Claude agent body is missing '## Relevant Skills' section"))
+
+    if is_copilot and "## Relevant Skills" not in body:
+        findings.append(("WARN", "Copilot agent body is missing '## Relevant Skills' section"))
+
     for pattern in SECRET_PATTERNS:
         if re.search(pattern, text):
             findings.append(("ERROR", "Possible secret/credential detected in agent file"))

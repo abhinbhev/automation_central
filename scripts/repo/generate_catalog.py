@@ -16,7 +16,7 @@ AGENTS_DIR = REPO_ROOT / ".claude" / "agents"
 PROMPTS_DIR = REPO_ROOT / ".github" / "prompts"
 OUTPUT = REPO_ROOT / "docs" / "automation-catalog.md"
 
-DOMAIN_ORDER = ["ado", "office", "comms", "devops", "coding", "data-ml", "infra", "meta"]
+DOMAIN_ORDER = ["ado", "office", "comms", "devops", "coding", "data-ml", "infra", "docs", "meta"]
 DOMAIN_LABELS = {
     "ado": "ADO",
     "office": "Office / Non-tech Outputs",
@@ -25,6 +25,7 @@ DOMAIN_LABELS = {
     "coding": "Coding / SCM",
     "data-ml": "Data / ML",
     "infra": "Platform / Infra",
+    "docs": "Documentation",
     "meta": "Repo Self-Maintenance (Meta)",
 }
 

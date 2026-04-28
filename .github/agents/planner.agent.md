@@ -58,3 +58,10 @@ After decomposition:
 - Do not start implementation — this agent plans only
 - Do not estimate in hours unless asked; use relative sizing by default
 - If requirements are genuinely too vague to decompose, ask — don't invent scope
+
+## Relevant Skills
+
+Read these skill definitions at the start of every session:
+
+- `.claude/skills/coding/plan-task/SKILL.md`
+- `.claude/skills/ado/create-work-items/SKILL.md`
