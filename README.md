@@ -1,0 +1,495 @@
+# automation_central
+
+Central hub for the ABI engineering team's AI-assisted agents, skills, scripts, and templates.
+
+Supports **Claude Code** and **GitHub Copilot** — any team member opens this repo in VS Code and gets access to 26 skills, 8 agent modes, 6 prompts, and 14 Python scripts that automate ADO board management, Office document generation, CI/CD scaffolding, data documentation, and more.
+
+---
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Setup](#setup)
+  - [1. Clone and open](#1-clone-and-open)
+  - [2. Python environment](#2-python-environment)
+  - [3. MCP servers](#3-mcp-servers)
+  - [4. Verify setup](#4-verify-setup)
+- [Repo Structure](#repo-structure)
+- [How to Use](#how-to-use)
+  - [Skills (Claude Code)](#skills-claude-code)
+  - [Prompts (GitHub Copilot)](#prompts-github-copilot)
+  - [Agent Modes](#agent-modes)
+  - [Python Scripts](#python-scripts)
+- [Automation Catalog](#automation-catalog)
+  - [ADO Board Management](#ado-board-management)
+  - [Office Documents](#office-documents)
+  - [Communication](#communication)
+  - [DevOps / CI-CD](#devops--ci-cd)
+  - [Infrastructure](#infrastructure)
+  - [Data / ML](#data--ml)
+  - [Coding](#coding)
+  - [Meta (Repo Management)](#meta-repo-management)
+- [MCP Server Reference](#mcp-server-reference)
+- [Environment Variables](#environment-variables)
+- [Contributing](#contributing)
+- [What Can You Do?](#what-can-you-do)
+- [Architecture Decisions](#architecture-decisions)
+
+---
+
+## Quick Start
+
+```bash
+# 1. Clone and open
+git clone <repo-url>
+cd automation_central
+code .
+
+# 2. Python env
+conda env create -f configs/envs/conda-env.yml
+conda activate automation-central
+
+# 3. MCP servers (follow configs/mcp/local/README.md for auth)
+npm install -g @modelcontextprotocol/server-azure-devops
+npm install -g @modelcontextprotocol/server-github
+npm install -g @modelcontextprotocol/server-msgraph
+
+# 4. Test — in Claude Code type:
+#    /meeting-minutes      then paste some notes
+#    /ppt-from-outline     then paste a bullet outline (builds HTML presentation)
+```
+
+---
+
+## Prerequisites
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| VS Code | Latest | Editor — loads agents, skills, prompts automatically |
+| Claude Code extension | Latest | Runs `.claude/` agents and skills |
+| GitHub Copilot extension | Latest | Runs `.github/` agents and prompts |
+| Git | 2.x+ | Version control |
+| Conda (Miniconda or Anaconda) | Latest | Python environment management |
+| Node.js | 18+ | MCP server installation (`npm`) |
+
+---
+
+## Setup
+
+### 1. Clone and open
+
+```bash
+git clone <repo-url>
+cd automation_central
+code .
+```
+
+When VS Code opens, it will prompt to install recommended extensions. Click **Install All**.
+
+> **Multi-root workspace**: You can also add this repo as a folder to an existing workspace (`File → Add Folder to Workspace`). The `.vscode/settings.json` and all agents/skills will still load.
+
+### 2. Python environment
+
+```bash
+conda env create -f configs/envs/conda-env.yml
+conda activate automation-central
+```
+
+Verify:
+```bash
+python -c "import azure.devops, docx, openpyxl, jinja2; print('OK')"
+```
+
+**Key packages** (all installed by the conda env):
+
+| Package | Used by |
+|---------|--------|
+| `azure-devops` | ADO scripts |
+| `azure-identity` | Azure auth |
+| `jinja2` | HTML presentation generation |
+| `python-docx` | Word document generation |
+| `openpyxl` | Excel report generation |
+| `httpx` | HTTP calls |
+| `typer` | CLI interfaces for all scripts |
+| `rich` | Formatted console output |
+| `pyyaml` | YAML parsing (pipeline docs) |
+| `python-dotenv` | `.env` file loading |
+
+### 3. MCP servers
+
+MCP (Model Context Protocol) servers give Claude Code and Copilot live access to external systems.
+
+#### Install
+
+```bash
+npm install -g @modelcontextprotocol/server-azure-devops
+npm install -g @modelcontextprotocol/server-github
+npm install -g @modelcontextprotocol/server-msgraph
+```
+
+#### Authenticate
+
+You need three sets of credentials. **Never commit these to the repo.**
+
+**Azure DevOps PAT:**
+1. Go to `https://dev.azure.com/<your-org>/_usersSettings/tokens`
+2. Create a token with scopes: `Work Items (Read & Write)`, `Code (Read)`, `Build (Read)`
+
+**GitHub PAT:**
+1. GitHub → Settings → Developer Settings → Personal access tokens → Fine-grained tokens
+2. Scopes: `repo`, `read:org`
+
+**MS Graph (Azure AD App):**
+1. Azure Portal → Azure Active Directory → App registrations → New registration
+2. Name: `automation-central-mcp-local`
+3. Delegated permissions: `Mail.ReadWrite`, `Calendars.Read`, `Files.ReadWrite`, `Sites.ReadWrite.All`, `ChannelMessage.Send`
+4. Grant admin consent → create client secret
+
+#### Set environment variables
+
+Add to your shell profile (PowerShell `$PROFILE`, bash `~/.bashrc`, or Windows System Environment Variables):
+
+```bash
+# ADO
+export ADO_ORG_URL="https://dev.azure.com/<your-org>"
+export ADO_PAT="<your-ado-pat>"
+export ADO_PROJECT="<your-project-name>"
+
+# GitHub
+export GITHUB_TOKEN="<your-github-pat>"
+
+# MS Graph (Teams, Outlook, SharePoint)
+export AZURE_TENANT_ID="<your-tenant-id>"
+export AZURE_CLIENT_ID="<your-app-client-id>"
+export AZURE_CLIENT_SECRET="<your-app-client-secret>"
+```
+
+PowerShell equivalent:
+```powershell
+$env:ADO_ORG_URL = "https://dev.azure.com/<your-org>"
+$env:ADO_PAT = "<your-ado-pat>"
+$env:ADO_PROJECT = "<your-project-name>"
+# ... etc
+```
+
+#### Configure Claude Code
+
+Merge the MCP server config into your Claude settings:
+
+```json
+{
+  "mcpServers": {
+    "azure-devops": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-azure-devops"],
+      "env": { "ADO_ORG_URL": "${ADO_ORG_URL}", "ADO_PAT": "${ADO_PAT}" }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}" }
+    },
+    "ms-graph": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-msgraph"],
+      "env": {
+        "AZURE_TENANT_ID": "${AZURE_TENANT_ID}",
+        "AZURE_CLIENT_ID": "${AZURE_CLIENT_ID}",
+        "AZURE_CLIENT_SECRET": "${AZURE_CLIENT_SECRET}"
+      }
+    }
+  }
+}
+```
+
+See `configs/mcp/local/README.md` for the full guide and a template JSON you can copy.
+
+### 4. Verify setup
+
+| Check | Command |
+|-------|---------|
+| Python env works | `python -c "import azure.devops, docx, openpyxl, jinja2; print('OK')"` |
+| ADO auth works | `python -c "from scripts.shared.auth import get_ado_connection; get_ado_connection(); print('OK')"` |
+| Skills appear | In Claude Code, type `/` — skills should autocomplete |
+| Prompts appear | In Copilot Chat, type `/` — prompts should autocomplete |
+| Agents appear | In agent picker, `ado-manager`, `coder`, etc. should be listed |
+
+---
+
+## Repo Structure
+
+```
+automation_central/
+├── .claude/
+│   ├── CLAUDE.md                          ← project-level instructions for Claude Code
+│   ├── agents/                            ← 8 Claude Code agent modes
+│   │   ├── ado-manager.agent.md
+│   │   ├── code-reviewer.agent.md
+│   │   ├── coder.agent.md
+│   │   ├── devops-engineer.agent.md
+│   │   ├── github-manager.agent.md
+│   │   ├── office-writer.agent.md
+│   │   ├── planner.agent.md
+│   │   └── tester.agent.md
+│   └── skills/                            ← 26 skills, grouped by domain
+│       ├── ado/                           ← ADO board management
+│       ├── coding/                        ← code review, planning, testing
+│       ├── comms/                         ← email, meetings, Teams
+│       ├── data-ml/                       ← schema docs, pipeline docs, model cards
+│       ├── devops/                        ← CI/CD, PR descriptions
+│       ├── infra/                         ← Terraform, arch diagrams, runbooks
+│       ├── meta/                          ← repo management (new-skill, new-agent, etc.)
+│       └── office/                        ← HTML presentations, Word, Excel
+├── .github/
+│   ├── copilot-instructions.md            ← team context for GitHub Copilot
+│   ├── agents/                            ← 8 Copilot agent modes
+│   ├── prompts/                           ← 6 Copilot slash-command prompts
+│   ├── instructions/                      ← scoped coding instructions (Python, ADO, Terraform)
+│   └── pull_request_template.md
+├── scripts/
+│   ├── ado/                               ← ADO API scripts (create, report, release notes)
+│   ├── office/                            ← ppt_builder (HTML), word_builder, excel_builder
+│   ├── data/                              ← schema_documenter, pipeline_documenter
+│   ├── git/                               ← pr_description
+│   ├── repo/                              ← validate_skill, validate_agent, generate_catalog
+│   └── shared/                            ← auth helpers, common utilities
+├── templates/
+│   ├── ppt/                               ← HTML aesthetic templates for presentations
+│   ├── word/                              ← .docx templates (SOP, ADR, RCA)
+│   ├── excel/                             ← .xlsx templates
+│   ├── ado/                               ← work item JSON templates
+│   └── iac/                               ← Terraform / GH Actions starters
+├── configs/
+│   ├── envs/conda-env.yml                 ← Python dependencies
+│   └── mcp/                               ← MCP server setup (local + remote)
+├── docs/                                  ← onboarding, contributing, catalog, MCP setup
+├── .vscode/                               ← recommended extensions + settings
+├── .gitignore
+├── PROGRESS.md                            ← build progress tracker
+└── README.md                              ← this file
+```
+
+---
+
+## How to Use
+
+### Skills (Claude Code)
+
+Skills are invoked with `/skill-name` in the Claude Code chat. Type `/` and autocomplete will show all available skills.
+
+**Example:**
+```
+/meeting-minutes
+
+Here are my notes from today's standup:
+- Alice: finished the auth migration PR, starting rate limiting today
+- Bob: blocked on Terraform VNet config, needs @Charlie to review
+- Charlie: completed sprint tracker Excel, will review Bob's PR after lunch
+```
+
+Claude will produce structured meeting minutes with attendees, decisions, and action items.
+
+**Skills that produce files** (presentations, Word, Excel) work in two phases:
+1. Phase 1: produces a structured plan/outline — you review and confirm
+2. Phase 2: on your approval, runs a Python script to generate the actual file
+
+### Prompts (GitHub Copilot)
+
+Prompts appear in Copilot Chat when you type `/`. They work similarly to skills but are designed for the Copilot interface.
+
+**Available prompts:**
+| Command | What it does |
+|---------|-------------|
+| `/create-work-items` | Parse a description → structured ADO work items |
+| `/ppt-from-outline` | Bullet outline → HTML presentation |
+| `/pr-description` | Git diff → PR body |
+| `/release-notes` | Sprint → release notes |
+| `/code-review` | Diff → review findings |
+| `/write-tests` | Code → pytest test suite |
+
+### Agent Modes
+
+Both Claude Code and Copilot support specialized agent modes. Select them from the agent picker or invoke as subagents.
+
+| Agent | Use when |
+|-------|---------|
+| `ado-manager` | Creating/querying ADO work items, sprint planning, release notes |
+| `github-manager` | PRs, issues, repo management, branch policies, GitHub Actions |
+| `office-writer` | Generating HTML presentations, Word, or Excel documents |
+| `planner` | Breaking features/epics into subtasks with acceptance criteria |
+| `coder` | Writing code following team standards |
+| `tester` | Generating pytest test suites |
+| `code-reviewer` | Reviewing diffs against the team checklist |
+| `devops-engineer` | CI/CD pipelines, Terraform modules, architecture diagrams |
+
+### Python Scripts
+
+Scripts are called by skills when actual file generation or API calls are needed. You can also run them directly:
+
+```bash
+# Create ADO work items from a JSON spec
+python scripts/ado/create_work_items.py --spec items.json --project MyProject
+
+# Generate a sprint status report
+python scripts/ado/sprint_report.py --iteration "MyProject\Sprint 42" --project MyProject
+
+# Build an HTML presentation from a slide plan
+python scripts/office/ppt_builder.py --plan slides.json --output presentation.html
+
+# Generate schema docs from SQL DDL
+python scripts/data/schema_documenter.py --ddl schema.sql --output docs.md
+
+# Validate a skill before PR
+python scripts/repo/validate_skill.py .claude/skills/ado/create-work-items
+
+# Regenerate the automation catalog
+python scripts/repo/generate_catalog.py
+```
+
+All scripts use `typer` for CLI, `rich` for output, and follow the conventions in `.github/instructions/python.instructions.md`.
+
+---
+
+## Automation Catalog
+
+### ADO Board Management
+
+| Skill | Description | Has Script |
+|-------|-------------|-----------|
+| `/create-work-items` | Freetext → ADO work items (single or bulk) | ✅ `create_work_items.py` |
+| `/sprint-planning` | Plan and populate a sprint from the backlog | — (MCP) |
+| `/release-notes` | Closed items → stakeholder or internal release notes | ✅ `release_notes.py` |
+| `/pr-linker` | Link GitHub PRs to ADO items via `AB#ID` tags | — (MCP) |
+
+### Office Documents
+
+| Skill | Description | Has Script |
+|-------|-------------|-----------|
+| `/ppt-from-outline` | Bullet outline → slide plan → `.html` presentation | ✅ `ppt_builder.py` |
+| `/word-doc` | SOPs, ADRs, specs, RCA, reports → `.docx` file | ✅ `word_builder.py` |
+| `/excel-report` | Data → formatted `.xlsx` with charts and conditional formatting | ✅ `excel_builder.py` |
+
+### Communication
+
+| Skill | Description |
+|-------|-------------|
+| `/meeting-minutes` | Transcript or notes → structured minutes with action items |
+| `/email-draft` | Draft a stakeholder email |
+| `/teams-announcement` | Sprint updates, release comms, incident resolved |
+
+### DevOps / CI-CD
+
+| Skill | Description |
+|-------|-------------|
+| `/pr-description` | Git diff → PR body (has script: `pr_description.py`) |
+| `/ado-pipeline-yaml` | Generate `azure-pipelines.yml` for any stack |
+| `/gh-actions-workflow` | Generate GitHub Actions workflow YAML |
+
+### Infrastructure
+
+| Skill | Description |
+|-------|-------------|
+| `/terraform-module` | Scaffold a complete Terraform module |
+| `/arch-diagram` | Generate Mermaid architecture diagrams (C4, sequence, deployment) |
+| `/incident-runbook` | Structured operational runbook |
+
+### Data / ML
+
+| Skill | Description | Has Script |
+|-------|-------------|-----------|
+| `/schema-docs` | DDL or live DB → schema Markdown + Mermaid ER diagram | ✅ `schema_documenter.py` |
+| `/pipeline-docs` | Airflow/ADF/dbt config → pipeline documentation | ✅ `pipeline_documenter.py` |
+| `/model-card` | ML model → model card with metrics, limitations, responsible AI |
+
+### Coding
+
+| Skill | Description |
+|-------|-------------|
+| `/plan-task` | Feature → decomposed subtasks with acceptance criteria |
+| `/code-review` | Code → review findings by severity (BLOCK/WARN/NIT) |
+| `/write-tests` | Code → pytest test suite |
+
+### Meta (Repo Management)
+
+| Skill | Description |
+|-------|-------------|
+| `/new-skill` | Scaffold a new SKILL.md with correct structure |
+| `/new-agent` | Scaffold a new .agent.md file |
+| `/validate-skill` | Check a skill against repo standards |
+| `/update-catalog` | Regenerate `docs/automation-catalog.md` |
+
+---
+
+## MCP Server Reference
+
+| Server | What it enables | Install command |
+|--------|----------------|----------------|
+| `azure-devops` | ADO work items, sprints, boards, pipelines | `npm i -g @modelcontextprotocol/server-azure-devops` |
+| `github` | PRs, issues, diffs, repo contents | `npm i -g @modelcontextprotocol/server-github` |
+| `ms-graph` | Outlook email, Teams messages, SharePoint/OneDrive | `npm i -g @modelcontextprotocol/server-msgraph` |
+| `filesystem` | Read/write local files | Built into Claude Code |
+
+Full MCP setup guide: [docs/mcp-setup.md](docs/mcp-setup.md) and [configs/mcp/local/README.md](configs/mcp/local/README.md)
+
+---
+
+## Environment Variables
+
+| Variable | Required by | Description |
+|----------|------------|-------------|
+| `ADO_ORG_URL` | ADO scripts + MCP | `https://dev.azure.com/<your-org>` |
+| `ADO_PAT` | ADO scripts + MCP | ADO Personal Access Token |
+| `ADO_PROJECT` | ADO scripts | Default ADO project name |
+| `GITHUB_TOKEN` | GitHub MCP + scripts | GitHub PAT |
+| `AZURE_TENANT_ID` | MS Graph MCP + auth | Azure AD tenant ID |
+| `AZURE_CLIENT_ID` | MS Graph MCP + auth | Azure AD app client ID |
+| `AZURE_CLIENT_SECRET` | MS Graph MCP + auth | Azure AD app client secret |
+| `SCHEMA_DB_URL` | `schema_documenter.py` | SQLAlchemy connection string (optional) |
+
+Store these in environment variables or a `.env` file (which is in `.gitignore`). **Never commit credentials.**
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide — branching, skill/agent/prompt creation, validators, PR checklist, naming conventions, and review criteria.
+
+---
+
+## What Can You Do?
+
+Open this repo in VS Code and you can ask your AI assistant to:
+
+| Just say... | What happens |
+|-------------|-------------|
+| "Create a presentation about Q3 results" | Builds a slide plan, asks for your OK, then generates an HTML presentation you open in your browser |
+| "Write meeting minutes from these notes" | Turns messy bullet points into structured minutes with action items and owners |
+| "Draft an email to stakeholders about the release" | Produces a polished email ready to send |
+| "Create work items for this feature" | Breaks your description into ADO Epics, Features, Stories, and Tasks |
+| "Write an SOP for the deployment process" | Generates a Word document following the SOP template |
+| "Generate a sprint report" | Pulls data from ADO and formats a status report |
+| "Review this code" | Checks your diff against the team checklist and flags issues by severity |
+| "Write tests for this module" | Generates a pytest test suite with edge cases |
+| "Scaffold a Terraform module for a storage account" | Produces `main.tf`, `variables.tf`, `outputs.tf` with team conventions |
+| "Generate a PR description" | Reads your git diff and writes a structured PR body |
+| "Plan this feature into subtasks" | Decomposes a feature into implementation tasks with acceptance criteria |
+| "Document this database schema" | Generates Markdown docs + a Mermaid ER diagram from your DDL |
+
+**How it works:** Type `/` in Claude Code or Copilot Chat to see all available commands, or just describe what you need in plain English and the right agent/skill activates automatically.
+
+---
+
+## Architecture Decisions
+
+| Decision | Choice | Why |
+|----------|--------|-----|
+| AI frameworks | Claude Code + GitHub Copilot | Team uses both; shared scripts ensure feature parity |
+| Skills location | `.claude/skills/<domain>/<name>/` | Claude Code standard; domain grouping keeps it navigable |
+| Copilot equivalent | `.github/prompts/` + `.github/agents/` | Copilot uses prompts (no native skills) + agent modes |
+| Scripts | Python in `scripts/` | Framework-agnostic; called by skills when execution > text |
+| MCP strategy | Local-first, remote path documented | No shared server yet; designed for easy migration |
+| Catalog | Auto-generated via `generate_catalog.py` | Prevents drift as skills accumulate |
+| Contribution | PR + validator gate + 1 reviewer | Low friction; `validate_skill.py` catches structural issues |
+| Tag convention | `snake_case` (`environment`, `team`, `managed_by`) | Consistent with Terraform HCL conventions |
+| Presentations | HTML (not `.pptx`) | Self-contained, no binary deps, template-driven CSS, opens in any browser |

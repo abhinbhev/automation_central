@@ -10,70 +10,109 @@ Supports both **Claude Code** and **GitHub Copilot** as AI frameworks, with shar
 
 ---
 
-## Status: Foundation Complete
+## Status: Skills + Scripts + Agents Complete — Audit Passed
 
-### Done
+### Done — Foundation (Phase 0)
 
 | Area | Files | Notes |
 |---|---|---|
 | Repo structure | All folders created | See tree below |
 | `.claude/CLAUDE.md` | ✅ | Project instructions for Claude Code |
 | `.github/copilot-instructions.md` | ✅ | Team base context for Copilot |
-| **Agents (Claude Code)** | 6 × `.agent.md` | planner, coder, code-reviewer, tester, ado-manager, office-writer |
-| **Agents (Copilot)** | Folder ready | Stubs to be written — use existing `.claude/agents/` as reference |
-| **First-wave skills** | 4 × `SKILL.md` | meeting-minutes, email-draft, pr-description, ppt-from-outline |
-| **Coding skills** | 3 × `SKILL.md` | plan-task, code-review, write-tests |
-| **Meta skills** | 4 × `SKILL.md` | new-skill, new-agent, validate-skill, update-catalog |
-| **Copilot prompts** | 6 × `.prompt.md` | create-work-item, ppt-from-outline, pr-description, release-notes, code-review, write-tests |
+| **Agents (Claude Code)** | 7 × `.agent.md` | planner, coder, code-reviewer, tester, ado-manager, office-writer, devops-engineer |
+| **Agents (Copilot)** | 7 × `.agent.md` | ✅ ado-manager, office-writer, devops-engineer, planner, coder, tester, code-reviewer |
+| **Copilot prompts** | 6 × `.prompt.md` | create-work-items, ppt-from-outline, pr-description, release-notes, code-review, write-tests |
 | **Copilot instructions** | 3 × `.instructions.md` | python, ado, terraform |
 | PR template | ✅ | `.github/pull_request_template.md` |
-| `scripts/repo/` | 3 scripts | validate_skill.py, validate_agent.py, generate_catalog.py |
-| `scripts/shared/` | 2 scripts | auth.py (ADO/GitHub/MSGraph), utils.py |
-| `scripts/git/` | 1 script | pr_description.py |
-| `configs/mcp/local/` | ✅ | Full setup guide + mcp-settings.template.json |
-| `configs/mcp/remote/` | ✅ | Future centralized setup documented |
+| `configs/mcp/` | ✅ | Local + remote setup documented |
 | `configs/envs/conda-env.yml` | ✅ | All Python dependencies |
 | `docs/` | 6 docs | README, onboarding, contributing, naming-conventions, mcp-setup, automation-catalog |
 | `.vscode/` | ✅ | settings.json + extensions.json |
 | `.gitignore` | ✅ | |
 
+### Done — Skills (26 total SKILL.md files)
+
+| Domain | Skills | Status |
+|---|---|---|
+| `coding` | plan-task, code-review, write-tests | ✅ Phase 0 |
+| `comms` | meeting-minutes, email-draft, teams-announcement | ✅ All done |
+| `devops` | pr-description, ado-pipeline-yaml, gh-actions-workflow | ✅ All done |
+| `meta` | new-skill, new-agent, validate-skill, update-catalog | ✅ Phase 0 |
+| `office` | ppt-from-outline, word-doc, excel-report | ✅ All done |
+| `ado` | create-work-items, sprint-planning, release-notes, pr-linker | ✅ All done |
+| `data-ml` | schema-docs, pipeline-docs, model-card | ✅ All done |
+| `infra` | terraform-module, arch-diagram, incident-runbook | ✅ All done |
+
+### Done — Python Scripts (14 total)
+
+| Script | Purpose | Status |
+|---|---|---|
+| `scripts/repo/validate_skill.py` | Validate SKILL.md structure | ✅ Phase 0 |
+| `scripts/repo/validate_agent.py` | Validate agent.md structure | ✅ Phase 0 |
+| `scripts/repo/generate_catalog.py` | Auto-generate automation catalog | ✅ Phase 0 |
+| `scripts/shared/auth.py` | ADO/GitHub/MSGraph auth helpers | ✅ Phase 0 |
+| `scripts/shared/utils.py` | Common utilities | ✅ Phase 0 |
+| `scripts/git/pr_description.py` | Generate PR description from diff | ✅ Phase 0 |
+| `scripts/ado/create_work_items.py` | ADO REST: create Epic/Feature/Story/Task from JSON | ✅ |
+| `scripts/ado/sprint_report.py` | Fetch sprint data → Markdown/JSON report | ✅ |
+| `scripts/ado/release_notes.py` | Build release notes from closed work items | ✅ |
+| `scripts/office/ppt_builder.py` | jinja2 + HTML: build presentation from JSON slide plan | ✅ |
+| `scripts/office/word_builder.py` | python-docx: generate Word docs from JSON spec | ✅ |
+| `scripts/office/excel_builder.py` | openpyxl: formatted Excel reports from JSON spec | ✅ |
+| `scripts/data/schema_documenter.py` | DDL/live DB → schema Markdown + Mermaid ER | ✅ |
+| `scripts/data/pipeline_documenter.py` | Airflow/ADF/dbt/generic → pipeline docs | ✅ |
+
 ---
 
-### Placeholder Skill Folders (SKILL.md not yet written)
+### Done — Quality Audit
 
-These folders exist — SKILL.md needs to be added. Use `/new-skill` in Claude Code to scaffold each one.
+Full audit of all 26 skills, 14 agents (7 Claude + 7 Copilot), and 14 scripts. **12 inconsistencies found and fixed:**
 
-| Domain | Skills Remaining |
-|---|---|
-| `ado` | create-work-items, sprint-planning, release-notes, pr-linker |
-| `office` | word-doc, excel-report |
-| `comms` | teams-announcement |
-| `devops` | gh-actions-workflow, ado-pipeline-yaml |
-| `data-ml` | pipeline-docs, schema-docs, model-card |
-| `infra` | terraform-module, arch-diagram, incident-runbook |
+| # | Issue | Fix |
+|---|-------|-----|
+| 1 | Missing Claude `devops-engineer` agent (Copilot had it, Claude didn't) | Created `.claude/agents/devops-engineer.agent.md` — now 7/7 parity |
+| 2 | Terraform tag casing (`PascalCase` vs `snake_case`) in skills and agents | Standardized to `snake_case` everywhere per `terraform.instructions.md` |
+| 3 | Broken `/rca` skill reference in `incident-runbook/SKILL.md` | Changed to `/word-doc` with `type: rca` |
+| 4 | ADO scripts missing error handling for API calls | Added `AzureDevOpsServiceError` try/except to `sprint_report.py`, `release_notes.py` |
+| 5 | Unused imports in 4 scripts | Removed `os`, `ast`, `RGBColor`, `sys` from respective scripts |
+| 6 | Missing type annotations on API client params | Added string annotations to all 3 ADO scripts + `excel_builder.py` |
+| 7 | Prompt naming mismatch (`create-work-item` → `create-work-items`) | Renamed file and updated to support bulk creation |
+| 8 | Code-reviewer agent parity (severity labels, function length threshold) | Standardized to BLOCK/WARN/NIT/GOOD, 40-line threshold in both frameworks |
+| 9 | Validator incompatibility (same frontmatter rules for Claude vs Copilot) | Split into `CLAUDE_REQUIRED_FRONTMATTER` / `COPILOT_REQUIRED_FRONTMATTER` |
+| 10 | Python instructions ambiguity (`main()` only, not `app()`) | Updated to say `main()` or `app()` when using typer |
 
-### Python Scripts Not Yet Written
+### Done — HTML Presentation Migration
 
-| Script | Purpose |
-|---|---|
-| `scripts/ado/create_work_items.py` | ADO REST API: create Epic/Feature/Story/Task |
-| `scripts/ado/sprint_report.py` | Fetch sprint data → report |
-| `scripts/ado/release_notes.py` | Build release notes from work items |
-| `scripts/office/ppt_builder.py` | python-pptx: populate slide deck from JSON plan |
-| `scripts/office/word_builder.py` | python-docx: fill Word templates |
-| `scripts/office/excel_builder.py` | openpyxl: generate/update spreadsheets |
-| `scripts/data/schema_documenter.py` | Introspect DB/CSV schema → markdown |
-| `scripts/data/pipeline_documenter.py` | Parse DAG/pipeline config → docs |
+Replaced `.pptx` generation (`python-pptx`) with self-contained HTML presentations (`jinja2`).
 
-### Copilot Agent Files Not Yet Written
+| Change | Details |
+|--------|--------|
+| `scripts/office/ppt_builder.py` | Rewrote: Jinja2 HTML generation with CSS template extraction, keyboard nav, print CSS |
+| `ppt-from-outline` skill | Updated: template system now uses `.html` files, two-phase confirm-then-build |
+| Both `office-writer` agents | Updated: PPT → HTML presentations, new template system documented |
+| `ppt-from-outline` Copilot prompt | Updated: HTML output, confirm-before-build |
+| `templates/ppt/team-update.html` | Created: ABI-branded HTML template with extractable `<style>` block |
+| `configs/envs/conda-env.yml` | Removed `python-pptx` (already had `jinja2`) |
+| `python.instructions.md` | Updated: `jinja2` for presentations instead of `python-pptx` |
+| `CONTRIBUTING.md` | Created: extracted from README, full contribution guide at repo root |
+| `README.md` | Updated: HTML presentations, new "What Can You Do?" section, contributing link |
 
-Folder: `.github/agents/`
-Agents to mirror from `.claude/agents/`: ado-manager, office-writer, devops-engineer, planner, coder, tester, code-reviewer
+### Done — Root README.md
 
-### Templates Not Yet Added
+Comprehensive `README.md` created at repo root covering: overview, prerequisites, full setup (conda, MCP, env vars, verification), repo structure, how to use (skills, prompts, agents, scripts), full automation catalog by domain, MCP server reference, env vars reference, contributing workflow, naming conventions, and architecture decisions.
+
+`docs/README.md` updated to match (brief quickstart version with links to full docs).
+
+---
+
+### Remaining: Templates
 
 Folder: `templates/`
-- `ppt/team-update.pptx`, `ppt/project-kickoff.pptx`
+Word and Excel templates require actual binary files (branded `.docx`, `.xlsx` bases). The scripts fall back to blank documents when templates are missing, so this is non-blocking.
+Presentation templates are `.html` files — `team-update.html` is already provided.
+
+- `ppt/team-update.html` ✅ (provided)
+- `ppt/project-kickoff.html` (create when needed)
 - `word/sop.docx`, `word/adr.docx`, `word/rca.docx`
 - `excel/sprint-tracker.xlsx`
 - `iac/terraform-module/` starter files

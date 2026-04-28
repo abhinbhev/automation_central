@@ -1,9 +1,9 @@
 ---
 mode: ask
-description: Generate a PowerPoint slide plan from a bullet-point outline
+description: Generate an HTML presentation from a bullet-point outline
 ---
 
-Turn the following outline into a structured PowerPoint slide plan.
+Turn the following outline into a structured presentation slide plan.
 
 For each slide, output:
 - Slide number and title
@@ -13,4 +13,6 @@ For each slide, output:
 
 Keep slides focused — one idea per slide. End with a "Next Steps" or "Summary" slide.
 
-After generating the plan, offer to run `scripts/office/ppt_builder.py` to produce the actual file.
+**Important:** Present the slide plan first and wait for user confirmation before building. Ask if they want any changes to the topics, order, or content.
+
+Once confirmed, run `scripts/office/ppt_builder.py` to produce a self-contained HTML file. The user can optionally specify a template name — the builder checks `templates/ppt/` for a matching `.html` file to use as an aesthetic reference.
