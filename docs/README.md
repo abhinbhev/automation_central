@@ -6,9 +6,9 @@ Central hub for the ABI engineering team's AI-assisted agents, skills, scripts, 
 
 | Directory | Purpose |
 |---|---|
-| `.claude/agents/` | Claude Code agent modes (7 agents) |
+| `.claude/agents/` | Claude Code agent modes (8 agents) |
 | `.claude/skills/` | Claude Code skills invoked with `/skill-name` (26 skills) |
-| `.github/agents/` | GitHub Copilot agent modes (7 agents) |
+| `.github/agents/` | GitHub Copilot agent modes (8 agents) |
 | `.github/prompts/` | GitHub Copilot slash-command prompts (6 prompts) |
 | `.github/instructions/` | Scoped coding instructions (Python, ADO, Terraform) |
 | `scripts/` | Python scripts called by skills (14 scripts) |

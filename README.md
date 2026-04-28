@@ -2,7 +2,7 @@
 
 Central hub for the ABI engineering team's AI-assisted agents, skills, scripts, and templates.
 
-Supports **Claude Code** and **GitHub Copilot** — any team member opens this repo in VS Code and gets access to 26 skills, 7 agent modes, 6 prompts, and 14 Python scripts that automate ADO board management, Office document generation, CI/CD scaffolding, data documentation, and more.
+Supports **Claude Code** and **GitHub Copilot** — any team member opens this repo in VS Code and gets access to 26 skills, 8 agent modes, 6 prompts, and 14 Python scripts that automate ADO board management, Office document generation, CI/CD scaffolding, data documentation, and more.
 
 ---
 
@@ -223,11 +223,12 @@ See `configs/mcp/local/README.md` for the full guide and a template JSON you can
 automation_central/
 ├── .claude/
 │   ├── CLAUDE.md                          ← project-level instructions for Claude Code
-│   ├── agents/                            ← 7 Claude Code agent modes
+│   ├── agents/                            ← 8 Claude Code agent modes
 │   │   ├── ado-manager.agent.md
 │   │   ├── code-reviewer.agent.md
 │   │   ├── coder.agent.md
 │   │   ├── devops-engineer.agent.md
+│   │   ├── github-manager.agent.md
 │   │   ├── office-writer.agent.md
 │   │   ├── planner.agent.md
 │   │   └── tester.agent.md
@@ -242,7 +243,7 @@ automation_central/
 │       └── office/                        ← HTML presentations, Word, Excel
 ├── .github/
 │   ├── copilot-instructions.md            ← team context for GitHub Copilot
-│   ├── agents/                            ← 7 Copilot agent modes
+│   ├── agents/                            ← 8 Copilot agent modes
 │   ├── prompts/                           ← 6 Copilot slash-command prompts
 │   ├── instructions/                      ← scoped coding instructions (Python, ADO, Terraform)
 │   └── pull_request_template.md
@@ -314,6 +315,7 @@ Both Claude Code and Copilot support specialized agent modes. Select them from t
 | Agent | Use when |
 |-------|---------|
 | `ado-manager` | Creating/querying ADO work items, sprint planning, release notes |
+| `github-manager` | PRs, issues, repo management, branch policies, GitHub Actions |
 | `office-writer` | Generating HTML presentations, Word, or Excel documents |
 | `planner` | Breaking features/epics into subtasks with acceptance criteria |
 | `coder` | Writing code following team standards |
