@@ -1,6 +1,7 @@
 ---
+name: add-agent
+description: "Create, validate, and register a new agent for both Claude Code and GitHub Copilot — scaffolds both .agent.md files, runs validators on each, and updates the catalog"
 mode: agent
-description: Create, validate, and register a new agent for both Claude Code and GitHub Copilot — scaffolds both .agent.md files, runs validators on each, and updates the catalog
 ---
 
 Create a new agent in `automation_central` for both Claude Code and GitHub Copilot.
@@ -23,6 +24,8 @@ Create a new agent in `automation_central` for both Claude Code and GitHub Copil
 - No naming conflict: check `.claude/agents/` and `.github/agents/` for existing files
 
 ### 2. Create both agent files simultaneously
+
+> **SYNC RULE:** Both files must always be written together. Never create or update one without the other.
 
 **`.claude/agents/<name>.agent.md`:**
 ```markdown

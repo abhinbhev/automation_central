@@ -1,6 +1,7 @@
 ---
+name: plan-sprint
+description: "Plan a sprint by pulling ready backlog items and matching them to team capacity"
 mode: ask
-description: Plan a sprint by pulling ready backlog items and matching them to team capacity
 ---
 
 Plan the next sprint from the available backlog.

@@ -1,6 +1,7 @@
 ---
+name: code-review
+description: "Review code or a diff against the team's SCM checklist"
 mode: ask
-description: Review code or a diff against the team's SCM checklist
 ---
 
 Review the following code or diff against the team's engineering standards.

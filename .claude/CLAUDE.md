@@ -17,6 +17,9 @@ You are assisting a cross-functional engineering team at ABI. This repo is the t
 
 - `.claude/skills/` — skills you can invoke with `/skill-name`
 - `.claude/agents/` — specialized agent modes
+- `.github/agents/` — Copilot-side agent modes (paired with `.claude/agents/`)
+- `.github/skills/` — Copilot skill definitions (SKILL.md format, `/skill-name` slash commands)
+- `.github/instructions/` — scoped coding standards (Python, ADO, Terraform) auto-injected by Copilot
 - `scripts/` — Python scripts called by skills when execution is needed
 - `templates/` — PowerPoint, Word, Excel, ADO, IaC templates
 - `configs/` — MCP server configs, conda environment
@@ -38,15 +41,23 @@ You are assisting a cross-functional engineering team at ABI. This repo is the t
 
 ## Skills Available
 
-Run `/update-catalog` to see the latest list, or check the README.md#automation-catalog section.
+Run `/update-catalog` to see the latest list, or check `docs/automation-catalog.md`.
 
-Quick reference for the most-used skills:
+Quick reference for frequently used skills:
 - `/meeting-minutes` — notes or transcript → structured minutes
 - `/email-draft` — draft a stakeholder email
 - `/pr-description` — git diff → PR body
+- `/commit-message` — staged diff → conventional commit message
 - `/ppt-from-outline` — outline → HTML presentation
+- `/excel-report` — description → formatted `.xlsx`
 - `/create-work-items` — freetext → ADO work items
 - `/code-review` — diff → SCM checklist review
 - `/plan-task` — feature description → subtasks
-- `/new-skill` — scaffold a new skill
+- `/write-readme` — codebase path → complete README
+- `/write-adr` — decision description → ADR
+- `/write-runbook` — service description → operational runbook
+- `/write-api-docs` — source code / OpenAPI spec → API reference
+- `/add-skill` — create + validate + register a new skill
+- `/add-agent` — scaffold both `.agent.md` files, validate, update catalog
+- `/new-skill` — scaffold a SKILL.md stub
 

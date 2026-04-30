@@ -1,6 +1,7 @@
 ---
+name: pr-description
+description: "Generate a structured PR description from a git diff or summary"
 mode: ask
-description: Generate a structured PR description from a git diff or summary
 ---
 
 Write a pull request description based on the provided diff or change summary.

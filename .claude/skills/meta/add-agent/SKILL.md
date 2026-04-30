@@ -84,19 +84,15 @@ Read these skill definitions at the start of every session:
 2. Check the name is `kebab-case` (lowercase, hyphens only, no underscores)
 3. Check for naming conflicts: scan `.claude/agents/` and `.github/agents/` for existing files
 4. Ask which existing skills are relevant — scan `.claude/skills/<domain>/` for each applicable domain
-5. Write `.claude/agents/<name>.agent.md`:
-   - `skills:` frontmatter listing each relevant skill as `domain/skill-name`
-   - Body with capabilities, workflow, and boundaries (>50 chars)
-   - `## Relevant Skills` section listing each skill's SKILL.md path
-6. Write `.github/agents/<name>.agent.md`:
-   - Same content adapted for Copilot frontmatter schema (no `skills:` in frontmatter)
-   - `## Relevant Skills` section mirroring the Claude agent
-7. Run `python scripts/repo/validate_agent.py .claude/agents/<name>.agent.md`
-8. Run `python scripts/repo/validate_agent.py .github/agents/<name>.agent.md`
-9. If either validator reports errors → fix them and re-run until **both pass**
-10. Run `python scripts/repo/generate_catalog.py`
-11. Ask: "Should I create new skills or Copilot prompts for this agent?"
-12. Report: paths created, both validator results, catalog item count
+5. **Write both agent files in the same operation — never create or update one without the other:**
+   - `.claude/agents/<name>.agent.md`: `skills:` frontmatter, body with capabilities/workflow/boundaries, `## Relevant Skills` section
+   - `.github/agents/<name>.agent.md`: Copilot frontmatter schema (no `skills:`), same body content, `## Relevant Skills` section mirroring the Claude agent
+6. Run `python scripts/repo/validate_agent.py .claude/agents/<name>.agent.md`
+7. Run `python scripts/repo/validate_agent.py .github/agents/<name>.agent.md`
+8. If either validator reports errors → fix them and re-run until **both pass**
+9. Run `python scripts/repo/generate_catalog.py`
+10. Ask: "Should I create new skills for this agent?"
+11. Report: paths created, both validator results, catalog item count
 
 ## Validation Checklist (enforced before completing)
 

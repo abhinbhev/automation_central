@@ -1,6 +1,7 @@
 ---
+name: write-runbook
+description: "Generate an operational runbook for a service, pipeline, or incident type — diagnosis, remediation, escalation, rollback"
 mode: agent
-description: Generate an operational runbook for a service, pipeline, or incident type — diagnosis, remediation, escalation, rollback
 ---
 
 Generate an operational runbook for the following service or scenario.

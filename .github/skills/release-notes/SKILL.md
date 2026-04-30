@@ -1,6 +1,7 @@
 ---
+name: release-notes
+description: "Generate release notes from ADO work items or a commit list"
 mode: ask
-description: Generate release notes from ADO work items or a commit list
 ---
 
 Generate release notes from the provided list of work items, commits, or PR titles.

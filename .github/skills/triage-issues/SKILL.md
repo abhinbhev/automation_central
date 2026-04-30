@@ -1,6 +1,7 @@
 ---
+name: triage-issues
+description: "Triage and structure GitHub issues from freetext, bug reports, or discussion threads"
 mode: ask
-description: Triage and structure GitHub issues from freetext, bug reports, or discussion threads
 ---
 
 Triage the following bug reports, feature requests, or discussion into well-structured GitHub issues.

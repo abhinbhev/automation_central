@@ -80,7 +80,7 @@ Invoke any skill by typing `/<skill-name>` in Claude Code chat.
 | Skill | Description | Script |
 |---|---|---|
 | `/add-agent` | Create, validate, and register a new agent for both Claude Code and GitHub Copilot in one atomic workflow — scaffolds both .agent.md files, runs validators on each, and updates the catalog | `scripts/repo/validate_agent.py` |
-| `/add-skill` | Create, validate, and register a new skill in one atomic workflow — scaffolds SKILL.md, runs the validator, fixes any errors, and updates the catalog | `scripts/repo/validate_skill.py` |
+| `/add-skill` | Create, validate, and register a new skill in one atomic workflow — scaffolds SKILL.md, runs the validator, fixes any errors, and updates the catalog. Handles both Claude Code skills (.claude/skills/) and Copilot Skills (.github/skills/) | `scripts/repo/validate_skill.py` |
 | `/new-agent` | Scaffold a new agent — creates .agent.md stubs for both Claude Code and GitHub Copilot | — |
 | `/new-skill` | Scaffold a new skill — creates the folder and a SKILL.md stub with all required fields | — |
 | `/update-catalog` | Rebuild docs/automation-catalog.md by reading all SKILL.md and .agent.md files | `scripts/repo/generate_catalog.py` |
@@ -95,7 +95,7 @@ Agents are persistent modes. Select one from the agent list in Claude Code.
 | Agent | Description |
 |---|---|
 | `ado-manager` | ADO specialist agent — manages work items, sprints, boards, and pipelines in Azure DevOps |
-| `agent-skill-manager` | Repo self-maintenance agent — creates, validates, and registers skills and agents in automation_central. Enforces naming conventions, runs validators, and keeps the catalog up to date. Use when adding or modifying any skill, agent, or Copilot prompt in this repo. |
+| `agent-skill-manager` | Repo self-maintenance agent — creates, validates, and registers skills and agents in automation_central. Enforces naming conventions, runs validators, and keeps the catalog up to date. Use when adding or modifying any skill, agent, or Copilot skill in this repo. |
 | `code-reviewer` | Code review agent — reviews diffs or PRs against the team's SCM checklist, flags issues by severity |
 | `coder` | Implementation agent — writes code following team standards, based on a plan or task description |
 | `devops-engineer` | DevOps and infrastructure agent — generates CI/CD pipelines (GitHub Actions, Azure Pipelines), Terraform modules, architecture diagrams, and incident runbooks |
@@ -107,30 +107,30 @@ Agents are persistent modes. Select one from the agent list in Claude Code.
 
 ---
 
-## GitHub Copilot Prompts
+## GitHub Copilot Skills
 
-Use in Copilot Chat: `@workspace /<prompt-name>`
+Use in Copilot Chat: type `/` and select a skill, or reference by name in agent sessions.
 
-| Prompt | Description |
-|---|---|
-| `/add-agent` | Create, validate, and register a new agent for both Claude Code and GitHub Copilot — scaffolds both .agent.md files, runs validators on each, and updates the catalog |
-| `/add-skill` | Create, validate, and register a new skill in automation_central — scaffolds SKILL.md, runs the validator, fixes errors, and updates the catalog in one workflow |
-| `/build-excel-report` | Build a formatted Excel report, tracker, or dashboard from a description or data |
-| `/code-review` | Review code or a diff against the team's SCM checklist |
-| `/commit-message` | Generate a conventional commit message from staged changes, a diff, or a description of what changed |
-| `/create-work-items` | Create ADO work items from a description, meeting notes, or spec |
-| `/decompose-feature` | Break a feature, epic, or vague requirement into an estimable, implementable backlog |
-| `/implement-feature` | Implement a feature or script following team standards (Python 3.11+, typed, tested) |
-| `/plan-sprint` | Plan a sprint by pulling ready backlog items and matching them to team capacity |
-| `/ppt-from-outline` | Generate an HTML presentation from a bullet-point outline |
-| `/pr-description` | Generate a structured PR description from a git diff or summary |
-| `/release-notes` | Generate release notes from ADO work items or a commit list |
-| `/scaffold-pipeline` | Scaffold a GitHub Actions or Azure Pipelines CI/CD workflow from a description |
-| `/scaffold-terraform` | Scaffold a Terraform module for Azure infrastructure from a description |
-| `/triage-issues` | Triage and structure GitHub issues from freetext, bug reports, or discussion threads |
-| `/write-adr` | Capture an architecture or technical decision as a structured ADR with context, options, decision, and consequences |
-| `/write-api-docs` | Generate API reference documentation from source code, an OpenAPI spec, or a description — endpoints, auth, schemas, error codes, examples |
-| `/write-readme` | Generate a complete README for a project, module, or script from the codebase or a description |
-| `/write-runbook` | Generate an operational runbook for a service, pipeline, or incident type — diagnosis, remediation, escalation, rollback |
-| `/write-tests` | Generate unit and integration test stubs for a function or module |
-| `/write-word-doc` | Generate a Word document (SOP, ADR, RCA, spec, runbook) from a description or outline |
+| Skill | Mode | Description |
+|---|---|---|
+| `/add-agent` | `agent` | Create, validate, and register a new agent for both Claude Code and GitHub Copilot — scaffolds both .agent.md files, runs validators on each, and updates the catalog |
+| `/add-skill` | `agent` | Create, validate, and register a new skill in automation_central — handles both Claude Code skills (.claude/skills/) and Copilot Skills (.github/skills/), scaffolds SKILL.md, runs the validator, fixes errors, and updates the catalog in one workflow |
+| `/build-excel-report` | `agent` | Build a formatted Excel report, tracker, or dashboard from a description or data |
+| `/code-review` | `ask` | Review code or a diff against the team's SCM checklist |
+| `/commit-message` | `ask` | Generate a conventional commit message from staged changes, a diff, or a description of what changed |
+| `/create-work-items` | `ask` | Create ADO work items from a description, meeting notes, or spec |
+| `/decompose-feature` | `ask` | Break a feature, epic, or vague requirement into an estimable, implementable backlog |
+| `/implement-feature` | `agent` | Implement a feature or script following team standards (Python 3.11+, typed, tested) |
+| `/plan-sprint` | `ask` | Plan a sprint by pulling ready backlog items and matching them to team capacity |
+| `/ppt-from-outline` | `agent` | Generate an HTML presentation from a bullet-point outline |
+| `/pr-description` | `ask` | Generate a structured PR description from a git diff or summary |
+| `/release-notes` | `ask` | Generate release notes from ADO work items or a commit list |
+| `/scaffold-pipeline` | `agent` | Scaffold a GitHub Actions or Azure Pipelines CI/CD workflow from a description |
+| `/scaffold-terraform` | `agent` | Scaffold a Terraform module for Azure infrastructure from a description |
+| `/triage-issues` | `ask` | Triage and structure GitHub issues from freetext, bug reports, or discussion threads |
+| `/write-adr` | `agent` | Capture an architecture or technical decision as a structured ADR with context, options, decision, and consequences |
+| `/write-api-docs` | `agent` | Generate API reference documentation from source code, an OpenAPI spec, or a description — endpoints, auth, schemas, error codes, examples |
+| `/write-readme` | `agent` | Generate a complete README for a project, module, or script from the codebase or a description |
+| `/write-runbook` | `agent` | Generate an operational runbook for a service, pipeline, or incident type — diagnosis, remediation, escalation, rollback |
+| `/write-tests` | `ask` | Generate unit and integration test stubs for a function or module |
+| `/write-word-doc` | `agent` | Generate a Word document (SOP, ADR, RCA, spec, runbook) from a description or outline |

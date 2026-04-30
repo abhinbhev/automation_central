@@ -1,6 +1,7 @@
 ---
+name: build-excel-report
+description: "Build a formatted Excel report, tracker, or dashboard from a description or data"
 mode: agent
-description: Build a formatted Excel report, tracker, or dashboard from a description or data
 ---
 
 Build an Excel report or tracker from the following description or data.

@@ -1,6 +1,7 @@
 ---
+name: write-word-doc
+description: "Generate a Word document (SOP, ADR, RCA, spec, runbook) from a description or outline"
 mode: agent
-description: Generate a Word document (SOP, ADR, RCA, spec, runbook) from a description or outline
 ---
 
 Generate a Word document from the following description or outline.

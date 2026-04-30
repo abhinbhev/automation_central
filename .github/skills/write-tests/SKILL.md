@@ -1,6 +1,7 @@
 ---
+name: write-tests
+description: "Generate unit and integration test stubs for a function or module"
 mode: ask
-description: Generate unit and integration test stubs for a function or module
 ---
 
 Generate test cases for the following code.
