@@ -2,7 +2,7 @@
 
 Central hub for the ABI engineering team's AI-assisted agents, skills, scripts, and templates.
 
-Supports **Claude Code** and **GitHub Copilot** — any team member opens this repo in VS Code and gets access to 33 skills, 10 agent modes, 21 prompts, and 14 Python scripts that automate ADO board management, Office document generation, CI/CD scaffolding, data documentation, and more.
+Supports **Claude Code** and **GitHub Copilot** — any team member opens this repo in VS Code and gets access to 33 Claude skills, 21 Copilot skills, 10 agent modes, and 14 Python scripts that automate ADO board management, Office document generation, CI/CD scaffolding, data documentation, and more.
 
 > **AI agents working in this repo: start at [`INSTRUCTIONS.md`](INSTRUCTIONS.md).** It is the canonical operating guide — wirings, file contracts, validators, workflows, pre-PR checklist. Human contributors: continue to [Quick Start](#quick-start) below or read [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -20,7 +20,7 @@ Supports **Claude Code** and **GitHub Copilot** — any team member opens this r
 - [Repo Structure](#repo-structure)
 - [How to Use](#how-to-use)
   - [Skills (Claude Code)](#skills-claude-code)
-  - [Prompts (GitHub Copilot)](#prompts-github-copilot)
+  - [GitHub Copilot Skills](#github-copilot-skills)
   - [Agent Modes](#agent-modes)
   - [Python Scripts](#python-scripts)
 - [Agent Prerequisites](#agent-prerequisites)
@@ -272,7 +272,7 @@ automation_central/
 ├── .github/
 │   ├── copilot-instructions.md            ← team context for GitHub Copilot
 │   ├── agents/                            ← 10 Copilot agent modes
-│   ├── prompts/                           ← 21 Copilot slash-command prompts
+│   ├── skills/                            ← 21 Copilot skill definitions (SKILL.md format)
 │   ├── instructions/                      ← scoped coding instructions (Python, ADO, Terraform)
 │   └── pull_request_template.md
 ├── scripts/
@@ -322,11 +322,9 @@ Claude will produce structured meeting minutes with attendees, decisions, and ac
 1. Phase 1: produces a structured plan/outline — you review and confirm
 2. Phase 2: on your approval, runs a Python script to generate the actual file
 
-### Prompts (GitHub Copilot)
+### GitHub Copilot Skills
 
-Prompts appear in Copilot Chat when you type `/`. They work similarly to skills but are designed for the Copilot interface.
-
-**Available prompts:**
+Copilot Skills appear in Copilot Chat when you type `/`. They are defined in `.github/skills/<name>/SKILL.md` and are also auto-loaded by Copilot agents for session context.
 
 **ADO & Planning**
 | Command | What it does |
@@ -375,7 +373,7 @@ Prompts appear in Copilot Chat when you type `/`. They work similarly to skills 
 
 ### Agent Modes
 
-Both Claude Code and Copilot support specialized agent modes. Select them from the agent picker or invoke as subagents.
+Both Claude Code and Copilot support specialized agent modes.Select them from the agent picker or invoke as subagents.
 
 | Agent | Use when |
 |-------|---------|
@@ -667,7 +665,7 @@ python scripts/repo/generate_catalog.py
 | Documentation | `/write-readme`, `/write-adr`, `/write-runbook`, `/write-api-docs` |
 | Meta | `/add-skill`, `/add-agent`, `/new-skill`, `/new-agent`, `/validate-skill`, `/update-catalog` |
 
-For full descriptions, script paths, agents, and Copilot prompts → see [`docs/automation-catalog.md`](docs/automation-catalog.md).
+For full descriptions, script paths, and agents → see [`docs/automation-catalog.md`](docs/automation-catalog.md).
 
 ---
 
@@ -680,7 +678,8 @@ All files and folders follow `<domain>-<action>` in kebab-case.
 | Skill folder | `<action>/` inside domain folder | `.claude/skills/ado/create-work-items/` |
 | Skill file | always `SKILL.md` | `.claude/skills/ado/create-work-items/SKILL.md` |
 | Agent file | `<domain>-<role>.agent.md` | `.claude/agents/ado-manager.agent.md` |
-| Copilot prompt | `<action>.prompt.md` | `.github/prompts/pr-description.prompt.md` |
+| Copilot Skill folder | `<action>/` inside `.github/skills/` | `.github/skills/pr-description/` |
+| Copilot Skill file | always `SKILL.md` | `.github/skills/pr-description/SKILL.md` |
 | Python script | `<action>_<noun>.py` (snake_case) | `scripts/ado/create_work_items.py` |
 | Template file | descriptive kebab-case | `templates/ppt/team-update.html` |
 
@@ -765,8 +764,8 @@ Open this repo in VS Code and you can ask your AI assistant to:
 | Decision | Choice | Why |
 |----------|--------|-----|
 | AI frameworks | Claude Code + GitHub Copilot | Team uses both; shared scripts ensure feature parity |
-| Skills location | `.claude/skills/<domain>/<name>/` | Claude Code standard; domain grouping keeps it navigable |
-| Copilot equivalent | `.github/prompts/` + `.github/agents/` | Copilot uses prompts (no native skills) + agent modes |
+| Skills location (Claude) | `.claude/skills/<domain>/<name>/` | Claude Code standard; domain grouping keeps it navigable |
+| Skills location (Copilot) | `.github/skills/<name>/` | VS Code Copilot native; `/skill-name` slash-command + agent auto-discovery via description |
 | Skills → agents | `skills:` frontmatter + `## Relevant Skills` body section | Each agent loads the SKILL.md files it needs at session start; both Claude and Copilot agents include this section since SKILL.md is readable markdown |
 | Scripts | Python in `scripts/` | Framework-agnostic; called by skills when execution > text |
 | MCP strategy | Local-first, remote path documented | No shared server yet; designed for easy migration |

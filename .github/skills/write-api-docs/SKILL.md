@@ -1,6 +1,7 @@
 ---
+name: write-api-docs
+description: "Generate API reference documentation from source code, an OpenAPI spec, or a description — endpoints, auth, schemas, error codes, examples"
 mode: agent
-description: Generate API reference documentation from source code, an OpenAPI spec, or a description — endpoints, auth, schemas, error codes, examples
 ---
 
 Generate API reference documentation for the following service or API.

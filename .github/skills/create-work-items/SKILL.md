@@ -1,6 +1,7 @@
 ---
+name: create-work-items
+description: "Create ADO work items from a description, meeting notes, or spec"
 mode: ask
-description: Create ADO work items from a description, meeting notes, or spec
 ---
 
 Create Azure DevOps work items from the following description.

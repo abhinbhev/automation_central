@@ -1,6 +1,7 @@
 ---
+name: scaffold-terraform
+description: "Scaffold a Terraform module for Azure infrastructure from a description"
 mode: agent
-description: Scaffold a Terraform module for Azure infrastructure from a description
 ---
 
 Generate a Terraform module for the following Azure infrastructure requirements.

@@ -1,6 +1,7 @@
 ---
+name: ppt-from-outline
+description: "Generate an HTML presentation from a bullet-point outline"
 mode: agent
-description: Generate an HTML presentation from a bullet-point outline
 ---
 
 Turn the following outline into a complete, presentation-ready slide plan.

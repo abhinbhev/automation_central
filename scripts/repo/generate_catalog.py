@@ -18,7 +18,7 @@ console = Console()
 REPO_ROOT = Path(__file__).parent.parent.parent
 SKILLS_DIR = REPO_ROOT / ".claude" / "skills"
 AGENTS_DIR = REPO_ROOT / ".claude" / "agents"
-PROMPTS_DIR = REPO_ROOT / ".github" / "prompts"
+GITHUB_SKILLS_DIR = REPO_ROOT / ".github" / "skills"
 OUTPUT = REPO_ROOT / "docs" / "automation-catalog.md"
 
 DOMAIN_ORDER = ["ado", "office", "comms", "devops", "coding", "data-ml", "infra", "docs", "meta"]
@@ -73,19 +73,23 @@ def collect_agents() -> list[dict]:
     return agents
 
 
-def collect_prompts() -> list[dict]:
-    prompts = []
-    for prompt_md in sorted(PROMPTS_DIR.glob("*.prompt.md")):
-        fm = parse_frontmatter(prompt_md)
-        name = prompt_md.stem.replace(".prompt", "")
-        prompts.append({
-            "name": name,
+def collect_github_skills() -> list[dict]:
+    if not GITHUB_SKILLS_DIR.exists():
+        return []
+    skills = []
+    for skill_md in sorted(GITHUB_SKILLS_DIR.glob("*/SKILL.md")):
+        fm = parse_frontmatter(skill_md)
+        if not fm.get("name"):
+            continue
+        skills.append({
+            "name": fm["name"],
             "description": fm.get("description", ""),
+            "mode": fm.get("mode", ""),
         })
-    return prompts
+    return skills
 
 
-def render_catalog(skills: dict, agents: list, prompts: list) -> str:
+def render_catalog(skills: dict, agents: list, github_skills: list) -> str:
     lines = [
         "# Automation Catalog",
         "",
@@ -139,15 +143,16 @@ def render_catalog(skills: dict, agents: list, prompts: list) -> str:
         "",
         "---",
         "",
-        "## GitHub Copilot Prompts",
+        "## GitHub Copilot Skills",
         "",
-        "Use in Copilot Chat: `@workspace /<prompt-name>`",
+        "Use in Copilot Chat: type `/` and select a skill, or reference by name in agent sessions.",
         "",
-        "| Prompt | Description |",
-        "|---|---|",
+        "| Skill | Mode | Description |",
+        "|---|---|---|",
     ]
-    for p in prompts:
-        lines.append(f"| `/{p['name']}` | {p['description']} |")
+    for s in github_skills:
+        mode_cell = f"`{s['mode']}`" if s.get("mode") else "—"
+        lines.append(f"| `/{s['name']}` | {mode_cell} | {s['description']} |")
 
     lines.append("")
     return "\n".join(lines)
@@ -155,17 +160,17 @@ def render_catalog(skills: dict, agents: list, prompts: list) -> str:
 
 @app.command()
 def main() -> None:
-    console.print("Scanning skills, agents, and prompts...")
+    console.print("Scanning skills, agents, and GitHub skills...")
     skills = collect_skills()
     agents = collect_agents()
-    prompts = collect_prompts()
+    github_skills = collect_github_skills()
 
     skill_count = sum(len(v) for v in skills.values())
     console.print(f"  Found {skill_count} skills across {len(skills)} domains")
     console.print(f"  Found {len(agents)} agents")
-    console.print(f"  Found {len(prompts)} prompts")
+    console.print(f"  Found {len(github_skills)} GitHub Copilot skills")
 
-    catalog = render_catalog(skills, agents, prompts)
+    catalog = render_catalog(skills, agents, github_skills)
     OUTPUT.write_text(catalog, encoding="utf-8")
     console.print(f"[green]✓ Written: {OUTPUT.relative_to(REPO_ROOT)}[/green]")
 

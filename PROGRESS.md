@@ -21,7 +21,7 @@ Supports both **Claude Code** and **GitHub Copilot** as AI frameworks, with shar
 | `.github/copilot-instructions.md` | ✅ | Team base context for Copilot |
 | **Agents (Claude Code)** | 10 × `.agent.md` | planner, coder, code-reviewer, tester, ado-manager, office-writer, devops-engineer, doc-writer, github-manager, agent-skill-manager |
 | **Agents (Copilot)** | 10 × `.agent.md` | planner, coder, code-reviewer, tester, ado-manager, office-writer, devops-engineer, doc-writer, github-manager, agent-skill-manager |
-| **Copilot prompts** | 21 × `.prompt.md` | create-work-items, ppt-from-outline, pr-description, release-notes, code-review, write-tests, add-agent, add-skill, build-excel-report, commit-message, decompose-feature, implement-feature, plan-sprint, scaffold-pipeline, scaffold-terraform, triage-issues, write-adr, write-api-docs, write-readme, write-runbook, write-word-doc |
+| **Copilot Skills** | 21 × `SKILL.md` | create-work-items, ppt-from-outline, pr-description, release-notes, code-review, write-tests, add-agent, add-skill, build-excel-report, commit-message, decompose-feature, implement-feature, plan-sprint, scaffold-pipeline, scaffold-terraform, triage-issues, write-adr, write-api-docs, write-readme, write-runbook, write-word-doc |
 | **Copilot instructions** | 3 × `.instructions.md` | python, ado, terraform |
 | PR template | ✅ | `.github/pull_request_template.md` |
 | `configs/mcp/` | ✅ | Local + remote setup documented |
@@ -91,7 +91,7 @@ Replaced `.pptx` generation (`python-pptx`) with self-contained HTML presentatio
 | `scripts/office/ppt_builder.py` | Rewrote: Jinja2 HTML generation with CSS template extraction, keyboard nav, print CSS |
 | `ppt-from-outline` skill | Updated: template system now uses `.html` files, two-phase confirm-then-build |
 | Both `office-writer` agents | Updated: PPT → HTML presentations, new template system documented |
-| `ppt-from-outline` Copilot prompt | Updated: HTML output, confirm-before-build |
+| `ppt-from-outline` Copilot Skill | Updated: HTML output, confirm-before-build |
 | `templates/ppt/team-update.html` | Created: ABI-branded HTML template with extractable `<style>` block |
 | `configs/envs/conda-env.yml` | Removed `python-pptx` (already had `jinja2`) |
 | `python.instructions.md` | Updated: `jinja2` for presentations instead of `python-pptx` |
@@ -106,8 +106,23 @@ Replaced `.pptx` generation (`python-pptx`) with self-contained HTML presentatio
 | **New `docs` skill domain** | 4 skills: `write-readme`, `write-adr`, `write-api-docs`, `write-runbook`. Paired with `doc-writer` agent |
 | **`devops/commit-message` skill** | New skill: generate conventional commit messages from staged diff |
 | **`meta/add-skill` + `meta/add-agent`** | New scaffolding skills alongside existing `new-skill`/`new-agent` (Claude Code variants) |
-| **15 new Copilot prompts** | add-agent, add-skill, build-excel-report, commit-message, decompose-feature, implement-feature, plan-sprint, scaffold-pipeline, scaffold-terraform, triage-issues, write-adr, write-api-docs, write-readme, write-runbook, write-word-doc. Total: 21 |
+| **15 new Copilot Skills** | add-agent, add-skill, build-excel-report, commit-message, decompose-feature, implement-feature, plan-sprint, scaffold-pipeline, scaffold-terraform, triage-issues, write-adr, write-api-docs, write-readme, write-runbook, write-word-doc. Total: 21 |
 | **IAC template folders** | `templates/iac/terraform-module/` and `templates/iac/gh-actions/` created (previously listed as remaining) |
+
+### Done — GitHub Copilot Skills Migration + Prompts Removal
+
+Migrated all 21 Copilot prompts into a structured `.github/skills/<name>/SKILL.md` format. The `.github/prompts/` directory was subsequently removed — Copilot Skills are now the sole Copilot invocation surface.
+
+| Change | Detail |
+|--------|--------|
+| `.github/skills/` tree | 21 directories, each with a `SKILL.md` (`name`, `description`, `mode` frontmatter + full instruction body) |
+| `.github/prompts/` | Removed — Copilot Skills replace prompts entirely |
+| `generate_catalog.py` | Prompts collection removed; GitHub Skills section is now the Copilot catalog |
+| `INSTRUCTIONS.md` | Prompt primitive removed; `Copilot Skill` is the canonical Copilot primitive; section 4.4 updated; wiring rules updated |
+| `CONTRIBUTING.md` | "Adding a Copilot Prompt + Skill" → "Adding a Copilot Skill"; PR checklist updated |
+| `CLAUDE.md` | `.github/prompts/` removed from repo structure |
+| Both `agent-skill-manager.agent.md` | Workflow updated; SYNC RULE added to Boundaries |
+| `add-skill` + `add-agent` skills | Updated to enforce dual-framework sync on every creation/update |
 
 ### Done — Root `README.md`
 
@@ -190,9 +205,11 @@ python scripts/git/pr_description.py --base main
 | Decision | Choice | Reason |
 |---|---|---|
 | AI frameworks | Both Claude Code + GitHub Copilot | Whole team uses VS Code; some use Claude Code, some Copilot |
-| Skills location | `.claude/skills/<domain>/<name>/SKILL.md` | Claude Code standard; domain grouping keeps catalog navigable |
-| Copilot equivalent | `.github/prompts/*.prompt.md` | Copilot has no native "skills" — prompts are the closest equivalent |
+| Skills location (Claude) | `.claude/skills/<domain>/<name>/SKILL.md` | Claude Code standard; domain grouping keeps catalog navigable |
+| Skills location (Copilot) | `.github/skills/<name>/SKILL.md` | VS Code Copilot native; `/skill-name` slash-command + agent auto-discovery via description field |
+| Prompts removed | `.github/prompts/` deleted | Copilot Skills supersede prompts — richer metadata, same invocation surface, no duplication |
 | Scripts | Python in `scripts/` | Framework-agnostic; called by skills when execution > text output |
 | MCP strategy | Local first, remote path documented | No shared server yet; designed for easy migration |
 | Catalog | Auto-generated via `generate_catalog.py` | Prevents catalog drift as skills accumulate |
 | Contribution | Open PR, light review, validator gate | Low friction; `validate_skill.py` catches structural issues automatically |
+| Dual-framework sync | Both Claude + Copilot assets updated together | SYNC RULE enforced in agent-skill-manager and add-skill/add-agent workflows |

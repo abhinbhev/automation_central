@@ -50,12 +50,14 @@ Branch from `main`, open a PR back to `main`, get one reviewer.
 5. Regenerate catalog: `python scripts/repo/generate_catalog.py`
 6. Open a PR
 
-## Adding a Copilot Prompt
+## Adding a Copilot Skill
 
-1. Add `.github/prompts/<action>.prompt.md`
-2. Follow naming: `<action>.prompt.md` (kebab-case, no domain prefix needed)
-3. Set `mode: ask` for review/analysis prompts; `mode: agent` for prompts that read/write files
-4. Test in Copilot Chat (`/` autocomplete) before opening a PR
+1. Create `.github/skills/<action>/SKILL.md`
+2. Follow naming: `<action>` (kebab-case, no domain prefix needed)
+3. Set `mode: ask` for review/analysis skills; `mode: agent` for skills that read/write files
+4. Frontmatter: `name` (matches folder), `description` (double-quoted with `"..."`), `mode`
+5. Body: full skill instruction content
+6. Test in Copilot Chat (`/` autocomplete) before opening a PR
 
 ## Agent Required Structure
 
@@ -105,13 +107,13 @@ Read these skill definitions at the start of every session:
 
 ## SKILL.md Required Sections
 
-Every `SKILL.md` must contain:
+**Claude Code** (`.claude/skills/<domain>/<name>/SKILL.md`):
 
 ```markdown
 ---
 name: <skill-name>          # matches folder name
 description: <one-liner>    # shown in catalog
-domain: <ado|office|devops|data-ml|infra|comms|coding|meta>
+domain: <ado|office|devops|data-ml|infra|comms|coding|meta|docs>
 requires_script: <true|false>
 ---
 
@@ -123,6 +125,18 @@ requires_script: <true|false>
 
 ## Steps
 <!-- What the skill does, step by step -->
+```
+
+**Copilot** (`.github/skills/<name>/SKILL.md`):
+
+```markdown
+---
+name: <skill-name>          # matches folder name, no domain prefix
+description: "<one-liner>"  # double-quoted
+mode: <ask|agent>           # ask = analysis only; agent = reads/writes files
+---
+
+<!-- Full skill instruction content — free-form, no required sections -->
 ```
 
 ## PR Checklist
@@ -143,6 +157,7 @@ See [README.md#naming-conventions](README.md#naming-conventions) for the full re
 | Item | Convention | Example |
 |------|-----------|---------|
 | Skill folders | `kebab-case` | `create-work-items` |
+| Copilot Skill folders | `kebab-case` | `create-work-items` |
 | Agent files | `kebab-case.agent.md` | `ado-manager.agent.md` |
 | Python scripts | `snake_case.py` | `create_work_items.py` |
 | Python functions | `snake_case` | `build_patch_document()` |

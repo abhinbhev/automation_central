@@ -1,6 +1,7 @@
 ---
+name: commit-message
+description: "Generate a conventional commit message from staged changes, a diff, or a description of what changed"
 mode: ask
-description: Generate a conventional commit message from staged changes, a diff, or a description of what changed
 ---
 
 Generate a commit message for the following change.

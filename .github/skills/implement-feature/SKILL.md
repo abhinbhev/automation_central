@@ -1,6 +1,7 @@
 ---
+name: implement-feature
+description: "Implement a feature or script following team standards (Python 3.11+, typed, tested)"
 mode: agent
-description: Implement a feature or script following team standards (Python 3.11+, typed, tested)
 ---
 
 Implement the following feature or script using team standards.

@@ -1,6 +1,7 @@
 ---
+name: write-readme
+description: "Generate a complete README for a project, module, or script from the codebase or a description"
 mode: agent
-description: Generate a complete README for a project, module, or script from the codebase or a description
 ---
 
 Generate a complete `README.md` for the specified project, module, or script.

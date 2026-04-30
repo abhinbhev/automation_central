@@ -45,23 +45,24 @@ The repo's own automations also maintain themselves — `agent-skill-manager` ag
 |---|---|---|---|
 | **Skill** | `.claude/skills/<domain>/<name>/SKILL.md` | Claude Code | `/skill-name` in Claude chat |
 | **Agent** (paired) | `.claude/agents/<name>.agent.md` **and** `.github/agents/<name>.agent.md` | Both frameworks | Selected from agent picker |
-| **Prompt** | `.github/prompts/<name>.prompt.md` | Copilot Chat | `/prompt-name` in Copilot |
-| **Script** | `scripts/<domain>/<action>.py` | Skills, agents, prompts, humans | `python scripts/<domain>/<action>.py …` |
+| **Copilot Skill** | `.github/skills/<name>/SKILL.md` | Copilot Chat / agents | `/skill-name` in Copilot Chat |
+| **Script** | `scripts/<domain>/<action>.py` | Skills, agents, humans | `python scripts/<domain>/<action>.py …` |
 
-**Counts as of 2026-04-28:** 33 skills, 10 agents (× 2 = 20 agent files), 21 prompts, 14 scripts. The opening lines of `README.md` carry these numbers — update them when counts change, or just leave the numbers off if you don't want to maintain them.
+**Counts as of 2026-04-29:** 33 Claude skills, 10 agents (× 2 = 20 agent files), 21 Copilot skills, 14 scripts. The opening lines of `README.md` carry these numbers — update them when counts change, or just leave the numbers off if you don't want to maintain them.
 
 ### Why two frameworks?
 
-Some team members use Claude Code, some use Copilot. Skills (Claude's native concept) and prompts (Copilot's equivalent) are not interchangeable but should produce the same outputs. Agent files are paired so both frameworks see the same persona.
+Some team members use Claude Code, some use Copilot. Claude uses Skills natively; Copilot uses its own Skill format (`.github/skills/`). Agent files are paired so both frameworks see the same persona. Copilot Skills replace what were previously `.prompt.md` files — they provide richer structured metadata for agent discovery.
 
 ### What goes where
 
 | Decision | Choice | Reason |
 |---|---|---|
-| File generation, API calls, multi-step execution | **Script** | Framework-agnostic; reusable from skill, prompt, or shell |
-| Reusable workflow with structured inputs/outputs | **Skill** + matching **prompt** | One source of truth, two invocation surfaces |
+| File generation, API calls, multi-step execution | **Script** | Framework-agnostic; reusable from skill or shell |
+| Reusable workflow for Claude Code | **Claude Skill** (`.claude/skills/`) | Slash-command invocable, domain-grouped |
+| Reusable workflow for Copilot | **Copilot Skill** (`.github/skills/`) | Slash-command invocable, agent-discoverable via description |
 | Persistent persona with capabilities and boundaries | **Agent pair** | Agents pull in skills as context |
-| One-shot LLM instruction with no execution | **Prompt** (Copilot) — no Claude equivalent needed |
+| Structured skill definition for Copilot agent discovery | **Copilot Skill** (`.github/skills/`) — pair with every Claude skill where applicable | Provides metadata + progressive loading; agents use it for context |
 
 If a workflow needs both an LLM step and a Python step (e.g., "generate Excel"), the **skill** drafts the spec and the **script** consumes the spec. Two phases, one skill. See [`/excel-report`](.claude/skills/office/excel-report/SKILL.md) for the canonical pattern.
 
@@ -97,31 +98,29 @@ If a workflow needs both an LLM step and a Python step (e.g., "generate Excel"),
 │  typer CLI, type-hinted, pytest-tested           │
 └──────────────────────────────────────────────────┘
 
-      .github/prompts/<name>.prompt.md
-      (Copilot equivalent of a skill — no script wiring;
-       can mention scripts in its body for the user to run)
+      .github/skills/<name>/SKILL.md
+      (Copilot equivalent of a Claude skill — invoked as /skill-name in
+       Copilot Chat; agents load it for session context via description)
 ```
 
 ### Wiring rules (enforced by validators)
 
-1. **Every Claude agent lists its skills twice.** Once in frontmatter (`skills: [domain/name, …]`) and once in the body (`## Relevant Skills` with full SKILL.md paths). The validator errors if any skill in frontmatter doesn't resolve to an actual `SKILL.md` file.
+1.**Every Claude agent lists its skills twice.** Once in frontmatter (`skills: [domain/name, …]`) and once in the body (`## Relevant Skills` with full SKILL.md paths). The validator errors if any skill in frontmatter doesn't resolve to an actual `SKILL.md` file.
 2. **Every Copilot agent has the body section.** Frontmatter is `description` + `tools` (no `skills` key — Copilot doesn't read it), but `## Relevant Skills` body section is required so the agent can read SKILL.md content at session start.
 3. **Skill names in frontmatter match folder names exactly.** `name: create-work-items` ↔ folder `create-work-items/`.
 4. **Agent `name` (Claude) matches filename stem.** `name: ado-manager` ↔ file `ado-manager.agent.md`.
 5. **Scripts referenced by `requires_script: true` must exist on disk** when the SKILL.md is committed.
-6. **Skills appearing in any agent's `skills:` must exist on disk.**
+6. **Skills appearing in any agent’s \skills:\ must exist on disk.**
 
-If you add a skill, the chain is: SKILL.md → at least one agent references it → catalog regenerated. If you add an agent, the chain is: both `.agent.md` files → both reference the same skills → both pass validators → catalog regenerated.
+If you add a skill, the chain is: SKILL.md → at least one agent references it → catalog regenerated. If you add an agent, the chain is: both \.agent.md\ files → both reference the same skills → both pass validators → catalog regenerated.
 
 ### Pairing model summary
 
 | What is paired | Pair members | Must match |
 |---|---|---|
-| Agent | `.claude/agents/X.agent.md` + `.github/agents/X.agent.md` | Same `name`/stem, same `description`, same `## Relevant Skills` list |
-| Skill ↔ Prompt | `.claude/skills/<domain>/X/SKILL.md` + `.github/prompts/X.prompt.md` (when both exist) | Same overall behaviour and output format. Not all skills have a Copilot prompt; not all prompts have a Claude skill |
+| Agent | \.claude/agents/X.agent.md\ + \.github/agents/X.agent.md\ | Same ame\/stem, same \description\, same \## Relevant Skills\ list |
+| Claude Skill ↔ Copilot Skill | \.claude/skills/<domain>/X/SKILL.md\ + \.github/skills/X/SKILL.md\ (when both exist) | Same overall behaviour and output format |
 | Script | (no pair — single source) | n/a |
-
-When prompt and skill cover the same workflow, keep them in sync. The prompt is the user-facing brief; the skill is the workflow specification. If you change one materially, change the other.
 
 ---
 
@@ -177,16 +176,24 @@ Required body:
 - Free-form persona description (>50 chars)
 - `## Relevant Skills` section mirroring the Claude pair
 
-### 4.4 Copilot `.prompt.md`
+### 4.4 GitHub Copilot Skill (`SKILL.md` under `.github/skills/<name>/`)
+
+Copilot Skills are the Copilot-native equivalent of Claude Skills. They appear as `/skill-name` slash commands in Copilot Chat and are auto-loaded by Copilot agents based on their `description` field.
+
+Required frontmatter:
 
 ```yaml
 ---
-mode: <ask | agent>         # ask = analysis/output only; agent = read/write files
-description: <one-liner>
+name: <skill-name>          # kebab-case, MUST match directory name
+description: "<one-liner>"  # double-quoted — used for Copilot discovery and our catalog. Max 1024 chars.
+mode: <ask | agent>         # CUSTOM FIELD — not a Copilot-native skill field; read by generate_catalog.py
+                            # Copilot ignores it; do NOT remove it
 ---
 ```
 
-Body is free-form; no required sections. Keep it focused — Copilot prompts are single-shot templates, not persistent personas.
+Body is the full skill instruction content — free-form, no required sections.
+No domain subdirectory — skills live flat under `.github/skills/`.
+`generate_catalog.py` indexes this directory and includes skills in the catalog.
 
 ### 4.5 Script (`scripts/<domain>/<action>.py`)
 
@@ -231,7 +238,6 @@ If a script reads or writes Unicode glyphs through `rich`, the script must call 
 | Skill folder | `<action>` kebab-case | `create-work-items/` |
 | Skill file | always `SKILL.md` | `SKILL.md` |
 | Agent file | `<role>.agent.md` kebab-case | `ado-manager.agent.md` |
-| Copilot prompt | `<action>.prompt.md` kebab-case | `commit-message.prompt.md` |
 | Python script | `<action>_<noun>.py` snake_case | `create_work_items.py` |
 | Python function | snake_case | `build_patch_document()` |
 | Python type | PascalCase | `WorkItemSpec` |

@@ -1,6 +1,7 @@
 ---
+name: write-adr
+description: "Capture an architecture or technical decision as a structured ADR with context, options, decision, and consequences"
 mode: agent
-description: Capture an architecture or technical decision as a structured ADR with context, options, decision, and consequences
 ---
 
 Write an Architecture Decision Record (ADR) for the following decision.

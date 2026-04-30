@@ -1,6 +1,7 @@
 ---
+name: scaffold-pipeline
+description: "Scaffold a GitHub Actions or Azure Pipelines CI/CD workflow from a description"
 mode: agent
-description: Scaffold a GitHub Actions or Azure Pipelines CI/CD workflow from a description
 ---
 
 Generate a CI/CD pipeline configuration from the following requirements.

@@ -1,6 +1,7 @@
 ---
+name: decompose-feature
+description: "Break a feature, epic, or vague requirement into an estimable, implementable backlog"
 mode: ask
-description: Break a feature, epic, or vague requirement into an estimable, implementable backlog
 ---
 
 Decompose the following feature or requirement into a structured backlog.
