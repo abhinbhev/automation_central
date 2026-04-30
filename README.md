@@ -2,7 +2,7 @@
 
 Central hub for the ABI engineering team's AI-assisted agents, skills, scripts, and templates.
 
-Supports **Claude Code** and **GitHub Copilot** — any team member opens this repo in VS Code and gets access to 33 Claude skills, 21 Copilot skills, 10 agent modes, and 14 Python scripts that automate ADO board management, Office document generation, CI/CD scaffolding, data documentation, and more.
+Supports **Claude Code** and **GitHub Copilot** — any team member opens this repo in VS Code and gets access to 33 Claude skills, 21 Copilot skills, 10 agent modes, and 15 Python scripts that automate ADO board management, Office document generation, CI/CD scaffolding, data documentation, and more.
 
 > **AI agents working in this repo: start at [`INSTRUCTIONS.md`](INSTRUCTIONS.md).** It is the canonical operating guide — wirings, file contracts, validators, workflows, pre-PR checklist. Human contributors: continue to [Quick Start](#quick-start) below or read [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -277,7 +277,7 @@ automation_central/
 │   └── pull_request_template.md
 ├── scripts/
 │   ├── ado/                               ← ADO API scripts (create, report, release notes)
-│   ├── office/                            ← ppt_builder (HTML), word_builder, excel_builder
+│   ├── office/                            ← ppt_builder (HTML), word_builder, excel_builder, generate_owr_docs
 │   ├── data/                              ← schema_documenter, pipeline_documenter
 │   ├── git/                               ← pr_description
 │   ├── repo/                              ← validate_skill, validate_agent, generate_catalog
@@ -401,6 +401,10 @@ python scripts/ado/sprint_report.py --iteration "MyProject\Sprint 42" --project 
 
 # Build an HTML presentation from a slide plan
 python scripts/office/ppt_builder.py --plan slides.json --output presentation.html
+
+# Generate OWR + HLR Word documents for ADO feature docs
+python scripts/office/generate_owr_docs.py
+python scripts/office/generate_owr_docs.py --out-dir docs/word
 
 # Generate schema docs from SQL DDL
 python scripts/data/schema_documenter.py --ddl schema.sql --output docs.md
