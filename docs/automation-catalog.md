@@ -72,6 +72,7 @@ Invoke any skill by typing `/<skill-name>` in Claude Code chat.
 |---|---|---|
 | `/write-adr` | Capture an architecture or technical decision as a structured ADR with context, decision, and consequences | — |
 | `/write-api-docs` | Generate API reference documentation from source code, OpenAPI specs, or a description — covers endpoints, auth, request/response schemas, and error codes | — |
+| `/write-owr-hlr` | Generate an OWR (One Way Report) + HLR (High-Level Requirements) product document — the standard ABI template for capturing feature objectives, scope, assumptions, open questions, and the full discovery-to-delivery checklist | `scripts/office/generate_owr_docs.py` |
 | `/write-readme` | Generate a complete README for a project, module, or script from the codebase or a description | — |
 | `/write-runbook` | Generate an operational runbook for a service, pipeline, or incident type — covers diagnosis, remediation, escalation, and rollback | — |
 
@@ -130,6 +131,7 @@ Use in Copilot Chat: type `/` and select a skill, or reference by name in agent 
 | `/triage-issues` | `ask` | Triage and structure GitHub issues from freetext, bug reports, or discussion threads |
 | `/write-adr` | `agent` | Capture an architecture or technical decision as a structured ADR with context, options, decision, and consequences |
 | `/write-api-docs` | `agent` | Generate API reference documentation from source code, an OpenAPI spec, or a description — endpoints, auth, schemas, error codes, examples |
+| `/write-owr-hlr` | `agent` | Generate an OWR (One Way Report) + HLR (High-Level Requirements) product document — the standard ABI template covering feature objectives, scope, assumptions, open questions, and the full 8-phase discovery-to-delivery checklist |
 | `/write-readme` | `agent` | Generate a complete README for a project, module, or script from the codebase or a description |
 | `/write-runbook` | `agent` | Generate an operational runbook for a service, pipeline, or incident type — diagnosis, remediation, escalation, rollback |
 | `/write-tests` | `ask` | Generate unit and integration test stubs for a function or module |
