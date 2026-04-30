@@ -14,7 +14,6 @@ dist/
 build/
 .venv/
 
-
 # Generated outputs (not templates)
 output/
 generated/
@@ -27,3 +26,20 @@ generated/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Templates — binary and user-specific files are local only
+# Folder structure is preserved via .gitkeep files
+templates/**
+!templates/**/
+!templates/**/.gitkeep
+
+# Template content files (binary/proprietary — keep folder structure via .gitkeep)
+# Code templates (.html, .tf, .yml, .json, .md) are tracked; binary content is not
+templates/**/*.pdf
+templates/**/*.doc
+templates/**/*.docx
+templates/**/*.xlsx
+templates/**/*.xls
+templates/**/*.pptx
+templates/**/*.ppt
+!templates/**/.gitkeep
