@@ -213,3 +213,9 @@ python scripts/git/pr_description.py --base main
 | Catalog | Auto-generated via `generate_catalog.py` | Prevents catalog drift as skills accumulate |
 | Contribution | Open PR, light review, validator gate | Low friction; `validate_skill.py` catches structural issues automatically |
 | Dual-framework sync | Both Claude + Copilot assets updated together | SYNC RULE enforced in agent-skill-manager and add-skill/add-agent workflows |
+
+---
+
+## TODO:
+
+1. Ingest EDA skill

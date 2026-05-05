@@ -48,6 +48,9 @@ Invoke any skill by typing `/<skill-name>` in Claude Code chat.
 |---|---|---|
 | `/code-review` | Review a git diff or code snippet against the team's SCM checklist, output findings by severity | — |
 | `/plan-task` | Break a feature or bug into subtasks with acceptance criteria; optionally create ADO work items | — |
+| `/scaffold-at-prompts` | Interactively scaffold all 6 Langfuse prompt files for any Analysis Template (AT) pipeline use case across any domain — query enhancer, template selector, arguments selector, simple summarizer, complex summarizer, and response evaluator | — |
+| `/scaffold-sp-wrapper` | Interactively scaffold the async wrapper functions layer (`<usecase>_functions.py`) that sits between SP class files and the LangGraph orchestrator — covers raw SP wrappers, release-date caching, post_processing(), and @register_function concept functions | — |
+| `/scaffold-stored-procedure` | Interactively scaffold a Python dynamic-SQL stored-procedure class file from a fact-table schema and business spec — including helpers, public method, _build_query, and a runnable __main__ smoke test | — |
 | `/write-tests` | Generate pytest test stubs and edge cases for a Python function or module | — |
 
 ### Data / ML
@@ -126,7 +129,10 @@ Use in Copilot Chat: type `/` and select a skill, or reference by name in agent 
 | `/ppt-from-outline` | `agent` | Generate an HTML presentation from a bullet-point outline |
 | `/pr-description` | `ask` | Generate a structured PR description from a git diff or summary |
 | `/release-notes` | `ask` | Generate release notes from ADO work items or a commit list |
+| `/scaffold-at-prompts` | `agent` | Interactively scaffold all 6 Langfuse prompt files for any Analysis Template (AT) pipeline use case across any domain — query enhancer, template selector, arguments selector, simple summarizer, complex summarizer, and response evaluator |
 | `/scaffold-pipeline` | `agent` | Scaffold a GitHub Actions or Azure Pipelines CI/CD workflow from a description |
+| `/scaffold-sp-wrapper` | `agent` | Interactively scaffold the async wrapper functions layer (`<usecase>_functions.py`) that sits between SP class files and the LangGraph orchestrator — covers raw SP wrappers, release-date caching, post_processing(), and @register_function concept functions |
+| `/scaffold-stored-procedure` | `agent` | Interactively scaffold a Python dynamic-SQL stored-procedure class file from a fact-table schema and business spec — including helpers, public method, _build_query, and a runnable __main__ smoke test |
 | `/scaffold-terraform` | `agent` | Scaffold a Terraform module for Azure infrastructure from a description |
 | `/triage-issues` | `ask` | Triage and structure GitHub issues from freetext, bug reports, or discussion threads |
 | `/write-adr` | `agent` | Capture an architecture or technical decision as a structured ADR with context, options, decision, and consequences |
