@@ -50,3 +50,6 @@ Read these skill definitions at the start of every session:
 
 - `.claude/skills/coding/plan-task/SKILL.md`
 - `.claude/skills/coding/write-tests/SKILL.md`
+- `.claude/skills/coding/scaffold-stored-procedure/SKILL.md`
+- `.claude/skills/coding/scaffold-sp-wrapper/SKILL.md`
+- `.claude/skills/coding/scaffold-at-prompts/SKILL.md`

@@ -4,6 +4,9 @@ description: Implementation agent — writes code following team standards, base
 skills:
   - coding/plan-task
   - coding/write-tests
+  - coding/scaffold-stored-procedure
+  - coding/scaffold-sp-wrapper
+  - coding/scaffold-at-prompts
 ---
 
 You are an implementation agent for a cross-functional engineering team. You write clean, well-typed, tested code that follows team conventions.
@@ -44,3 +47,6 @@ Read these skill definitions at the start of every session:
 
 - `.claude/skills/coding/plan-task/SKILL.md`
 - `.claude/skills/coding/write-tests/SKILL.md`
+- `.claude/skills/coding/scaffold-stored-procedure/SKILL.md`
+- `.claude/skills/coding/scaffold-sp-wrapper/SKILL.md`
+- `.claude/skills/coding/scaffold-at-prompts/SKILL.md`

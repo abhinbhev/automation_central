@@ -2,7 +2,7 @@
 
 Central hub for the ABI engineering team's AI-assisted agents, skills, scripts, and templates.
 
-Supports **Claude Code** and **GitHub Copilot** — any team member opens this repo in VS Code and gets access to 33 Claude skills, 21 Copilot skills, 10 agent modes, and 15 Python scripts that automate ADO board management, Office document generation, CI/CD scaffolding, data documentation, and more.
+Supports **Claude Code** and **GitHub Copilot** — any team member opens this repo in VS Code and gets access to 37 Claude skills, 25 Copilot skills, 10 agent modes, and 15 Python scripts that automate ADO board management, Office document generation, CI/CD scaffolding, data documentation, stored-procedure scaffolding, and more.
 
 > **AI agents working in this repo: start at [`INSTRUCTIONS.md`](INSTRUCTIONS.md).** It is the canonical operating guide — wirings, file contracts, validators, workflows, pre-PR checklist. Human contributors: continue to [Quick Start](#quick-start) below or read [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -259,7 +259,7 @@ automation_central/
 │   │   ├── office-writer.agent.md
 │   │   ├── planner.agent.md
 │   │   └── tester.agent.md
-│   └── skills/                            ← 33 skills, grouped by domain
+│   └── skills/                            ← 37 skills, grouped by domain
 │       ├── ado/                           ← ADO board management
 │       ├── coding/                        ← code review, planning, testing
 │       ├── comms/                         ← email, meetings, Teams
@@ -272,7 +272,7 @@ automation_central/
 ├── .github/
 │   ├── copilot-instructions.md            ← team context for GitHub Copilot
 │   ├── agents/                            ← 10 Copilot agent modes
-│   ├── skills/                            ← 21 Copilot skill definitions (SKILL.md format)
+│   ├── skills/                            ← 25 Copilot skill definitions (SKILL.md format)
 │   ├── instructions/                      ← scoped coding instructions (Python, ADO, Terraform)
 │   └── pull_request_template.md
 ├── scripts/
@@ -344,6 +344,8 @@ Copilot Skills appear in Copilot Chat when you type `/`. They are defined in `.g
 | `/pr-description` | Git diff → PR body |
 | `/scaffold-pipeline` | Requirements → GitHub Actions or Azure Pipelines YAML |
 | `/scaffold-terraform` | Requirements → Terraform module (`main.tf`, `variables.tf`, `outputs.tf`, `versions.tf`) |
+| `/scaffold-stored-procedure` | Schema + spec → Python dynamic-SQL SP class file |
+| `/scaffold-sp-wrapper` | SP class + use case → async wrapper functions layer (`_functions.py`) |
 
 **Documentation**
 | Command | What it does |
@@ -562,6 +564,8 @@ Used for: resolving existing Azure resource IDs and data sources when scaffoldin
 
 Writes and runs Python code. Requires the full conda environment to execute and test generated scripts.
 
+Also handles **stored-procedure scaffolding** — use `/scaffold-stored-procedure` to generate a Python dynamic-SQL SP class file from a fact-table schema, and `/scaffold-sp-wrapper` to generate the async wrapper functions layer that connects SP classes to the LangGraph orchestrator.
+
 **Setup**
 ```bash
 conda env create -f configs/envs/conda-env.yml
@@ -638,7 +642,7 @@ python scripts/repo/validate_agent.py .claude/agents/agent-skill-manager.agent.m
 **Audit skill utilization** (confirm every skill is referenced by at least one agent):
 ```bash
 # Cross-reference .claude/skills/ against skills: frontmatter in .claude/agents/
-# All 33 skills should be referenced — validate_agent.py warns on missing skills: frontmatter
+# All 37 skills should be referenced — validate_agent.py warns on missing skills: frontmatter
 python scripts/repo/generate_catalog.py
 ```
 
@@ -663,7 +667,7 @@ python scripts/repo/generate_catalog.py
 | Office | `/ppt-from-outline`, `/word-doc`, `/excel-report` |
 | Communication | `/meeting-minutes`, `/email-draft`, `/teams-announcement` |
 | DevOps / CI-CD | `/pr-description`, `/commit-message`, `/ado-pipeline-yaml`, `/gh-actions-workflow` |
-| Coding | `/plan-task`, `/code-review`, `/write-tests` |
+| Coding | `/plan-task`, `/code-review`, `/write-tests`, `/scaffold-stored-procedure`, `/scaffold-sp-wrapper` |
 | Data / ML | `/schema-docs`, `/pipeline-docs`, `/model-card` |
 | Infrastructure | `/terraform-module`, `/arch-diagram`, `/incident-runbook` |
 | Documentation | `/write-readme`, `/write-adr`, `/write-runbook`, `/write-api-docs` |

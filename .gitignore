@@ -37,3 +37,8 @@ templates/**/*.xlsx
 templates/**/*.xls
 templates/**/*.pptx
 templates/**/*.ppt
+templates/**/*.py
+templates/**/*.md
+
+
+working directory/**/
