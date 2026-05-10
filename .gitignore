@@ -41,4 +41,4 @@ templates/**/*.py
 templates/**/*.md
 
 
-working directory/**/
+working_directory/**/
