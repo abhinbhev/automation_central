@@ -21,7 +21,7 @@ Supports both **Claude Code** and **GitHub Copilot** as AI frameworks, with shar
 | `.github/copilot-instructions.md` | ✅ | Team base context for Copilot |
 | **Agents (Claude Code)** | 10 × `.agent.md` | planner, coder, code-reviewer, tester, ado-manager, office-writer, devops-engineer, doc-writer, github-manager, agent-skill-manager |
 | **Agents (Copilot)** | 10 × `.agent.md` | planner, coder, code-reviewer, tester, ado-manager, office-writer, devops-engineer, doc-writer, github-manager, agent-skill-manager |
-| **Copilot Skills** | 21 × `SKILL.md` | create-work-items, ppt-from-outline, pr-description, release-notes, code-review, write-tests, add-agent, add-skill, build-excel-report, commit-message, decompose-feature, implement-feature, plan-sprint, scaffold-pipeline, scaffold-terraform, triage-issues, write-adr, write-api-docs, write-readme, write-runbook, write-word-doc |
+| **Copilot Skills** | 25 × `SKILL.md` | create-work-items, ppt-from-outline, pr-description, release-notes, code-review, write-tests, add-agent, add-skill, build-excel-report, commit-message, decompose-feature, implement-feature, plan-sprint, scaffold-pipeline, scaffold-terraform, triage-issues, write-adr, write-api-docs, write-readme, write-runbook, write-word-doc, scaffold-stored-procedure, scaffold-sp-wrapper, scaffold-at-prompts, write-owr-hlr |
 | **Copilot instructions** | 3 × `.instructions.md` | python, ado, terraform |
 | PR template | ✅ | `.github/pull_request_template.md` |
 | `configs/mcp/` | ✅ | Local + remote setup documented |
@@ -30,11 +30,11 @@ Supports both **Claude Code** and **GitHub Copilot** as AI frameworks, with shar
 | `.vscode/` | ✅ | settings.json + extensions.json |
 | `.gitignore` | ✅ | |
 
-### Done — Skills (33 total SKILL.md files)
+### Done — Skills (37 total SKILL.md files)
 
 | Domain | Skills | Status |
 |---|---|---|
-| `coding` | plan-task, code-review, write-tests | ✅ Phase 0 |
+| `coding` | plan-task, code-review, write-tests, scaffold-stored-procedure, scaffold-sp-wrapper, scaffold-at-prompts | ✅ All done |
 | `comms` | meeting-minutes, email-draft, teams-announcement | ✅ All done |
 | `devops` | pr-description, ado-pipeline-yaml, gh-actions-workflow, commit-message | ✅ All done |
 | `meta` | new-skill, new-agent, validate-skill, update-catalog, add-skill, add-agent | ✅ All done |
@@ -42,9 +42,9 @@ Supports both **Claude Code** and **GitHub Copilot** as AI frameworks, with shar
 | `ado` | create-work-items, sprint-planning, release-notes, pr-linker | ✅ All done |
 | `data-ml` | schema-docs, pipeline-docs, model-card | ✅ All done |
 | `infra` | terraform-module, arch-diagram, incident-runbook | ✅ All done |
-| `docs` | write-readme, write-adr, write-api-docs, write-runbook | ✅ All done |
+| `docs` | write-readme, write-adr, write-api-docs, write-runbook, write-owr-hlr | ✅ All done |
 
-### Done — Python Scripts (14 total)
+### Done — Python Scripts (15 total)
 
 | Script | Purpose | Status |
 |---|---|---|
@@ -60,6 +60,7 @@ Supports both **Claude Code** and **GitHub Copilot** as AI frameworks, with shar
 | `scripts/office/ppt_builder.py` | jinja2 + HTML: build presentation from JSON slide plan | ✅ |
 | `scripts/office/word_builder.py` | python-docx: generate Word docs from JSON spec | ✅ |
 | `scripts/office/excel_builder.py` | openpyxl: formatted Excel reports from JSON spec | ✅ |
+| `scripts/office/generate_owr_docs.py` | Generate OWR + HLR Word documents for ADO feature pipelines | ✅ |
 | `scripts/data/schema_documenter.py` | DDL/live DB → schema Markdown + Mermaid ER | ✅ |
 | `scripts/data/pipeline_documenter.py` | Airflow/ADF/dbt/generic → pipeline docs | ✅ |
 
@@ -219,3 +220,4 @@ python scripts/git/pr_description.py --base main
 ## TODO:
 
 1. Ingest EDA skill
+2. Add DE agent

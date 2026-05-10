@@ -227,7 +227,7 @@ See `configs/mcp/local/README.md` for the full guide and a template JSON you can
 | Python env works | `python -c "import azure.devops, docx, openpyxl, jinja2; print('OK')"` |
 | ADO auth works | `python -c "from scripts.shared.auth import get_ado_connection; get_ado_connection(); print('OK')"` |
 | Skills appear | In Claude Code, type `/` — skills should autocomplete |
-| Prompts appear | In Copilot Chat, type `/` — prompts should autocomplete |
+| Copilot Skills appear | In Copilot Chat, type `/` — skills should autocomplete |
 | Agents appear | In agent picker, `ado-manager`, `coder`, etc. should be listed |
 
 **Test a skill (Claude Code):**
@@ -235,7 +235,7 @@ See `configs/mcp/local/README.md` for the full guide and a template JSON you can
 2. Type `/meeting-minutes` and paste some bullet-point notes
 3. Claude should return formatted minutes with attendees, decisions, and action items
 
-**Test a prompt (GitHub Copilot):**
+**Test a Copilot skill (GitHub Copilot):**
 1. Open Copilot Chat (`Ctrl+Alt+I`)
 2. Type `/create-work-items` followed by a short task description
 3. Copilot should return a structured ADO work item preview
@@ -588,6 +588,8 @@ python -m pytest --co  # dry-run: collect tests without executing
 
 No external API access required. For integration tests that call live services, the relevant credentials (ADO PAT, GitHub token) must be set.
 
+After writing tests, the agent will ask if you want an **HTML test report**. If yes, it generates a detailed report covering every test case (name, description, inputs, expected vs actual outputs, pass/fail status, mocking setup) plus a summary with total counts and any flagged untestable paths.
+
 ---
 
 ### `code-reviewer`
@@ -667,10 +669,10 @@ python scripts/repo/generate_catalog.py
 | Office | `/ppt-from-outline`, `/word-doc`, `/excel-report` |
 | Communication | `/meeting-minutes`, `/email-draft`, `/teams-announcement` |
 | DevOps / CI-CD | `/pr-description`, `/commit-message`, `/ado-pipeline-yaml`, `/gh-actions-workflow` |
-| Coding | `/plan-task`, `/code-review`, `/write-tests`, `/scaffold-stored-procedure`, `/scaffold-sp-wrapper` |
+| Coding | `/plan-task`, `/code-review`, `/write-tests`, `/scaffold-stored-procedure`, `/scaffold-sp-wrapper`, `/scaffold-at-prompts` |
 | Data / ML | `/schema-docs`, `/pipeline-docs`, `/model-card` |
 | Infrastructure | `/terraform-module`, `/arch-diagram`, `/incident-runbook` |
-| Documentation | `/write-readme`, `/write-adr`, `/write-runbook`, `/write-api-docs` |
+| Documentation | `/write-readme`, `/write-adr`, `/write-runbook`, `/write-api-docs`, `/write-owr-hlr` |
 | Meta | `/add-skill`, `/add-agent`, `/new-skill`, `/new-agent`, `/validate-skill`, `/update-catalog` |
 
 For full descriptions, script paths, and agents → see [`docs/automation-catalog.md`](docs/automation-catalog.md).

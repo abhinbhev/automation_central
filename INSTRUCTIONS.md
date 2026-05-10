@@ -48,7 +48,7 @@ The repo's own automations also maintain themselves — `agent-skill-manager` ag
 | **Copilot Skill** | `.github/skills/<name>/SKILL.md` | Copilot Chat / agents | `/skill-name` in Copilot Chat |
 | **Script** | `scripts/<domain>/<action>.py` | Skills, agents, humans | `python scripts/<domain>/<action>.py …` |
 
-**Counts as of 2026-04-29:** 33 Claude skills, 10 agents (× 2 = 20 agent files), 21 Copilot skills, 14 scripts. The opening lines of `README.md` carry these numbers — update them when counts change, or just leave the numbers off if you don't want to maintain them.
+**Counts as of 2026-05-11:** 37 Claude skills, 10 agents (× 2 = 20 agent files), 25 Copilot skills, 15 scripts. The opening lines of `README.md` carry these numbers — update them when counts change, or just leave the numbers off if you don't want to maintain them.
 
 ### Why two frameworks?
 
@@ -320,9 +320,9 @@ WARNs (exit 0) when `skills:` is missing entirely on a Claude agent — preferre
 python scripts/repo/generate_catalog.py
 ```
 
-Scans `.claude/skills/`, `.claude/agents/`, `.github/prompts/` and writes `docs/automation-catalog.md`. **Never edit `docs/automation-catalog.md` by hand** — it gets overwritten on next run.
+Scans `.claude/skills/`, `.claude/agents/`, `.github/skills/` and writes `docs/automation-catalog.md`. **Never edit `docs/automation-catalog.md` by hand** — it gets overwritten on next run.
 
-The catalog is the user-facing skill/agent/prompt directory. Keep it fresh: any time skill/agent/prompt counts, names, or descriptions change, run this script before opening a PR.
+The catalog is the user-facing skill/agent/skill directory. Keep it fresh: any time skill/agent counts, names, or descriptions change, run this script before opening a PR.
 
 ---
 
@@ -336,11 +336,11 @@ The catalog is the user-facing skill/agent/prompt directory. Keep it fresh: any 
 4. Run `python scripts/repo/validate_skill.py .claude/skills/<domain>/<name>`. Fix any errors and re-run.
 5. Add the skill to at least one agent's `skills:` frontmatter and `## Relevant Skills` body — both Claude and Copilot pair members.
 6. Re-run `validate_agent.py` on the agents you touched.
-7. If a Copilot equivalent makes sense, create `.github/prompts/<name>.prompt.md`.
+7. If a Copilot equivalent makes sense, create `.github/skills/<name>/SKILL.md` (Copilot Skill format).
 8. Run `python scripts/repo/generate_catalog.py`.
 9. Open a PR using the template at `.github/pull_request_template.md`.
 
-The `agent-skill-manager` agent can run all of this for you in one pass — invoke it with `/add-skill` (Claude) or `/add-skill` (Copilot prompt).
+The `agent-skill-manager` agent can run all of this for you in one pass — invoke it with `/add-skill` (Claude) or `/add-skill` (Copilot skill).
 
 ### 8.2 Add a new agent (pair)
 
@@ -358,13 +358,13 @@ The `agent-skill-manager` agent can run all of this for you in one pass — invo
 6. Run `generate_catalog.py`.
 7. Update `README.md` if the agent table needs a new row (under the `## Agent Modes` section and `## Agent Prerequisites` if the agent has external deps).
 
-The `/add-agent` skill (Claude) and `/add-agent` prompt (Copilot) automate this.
+The `/add-agent` skill (Claude) and `/add-agent` skill (Copilot) automate this.
 
-### 8.3 Add a Copilot prompt (no skill counterpart needed)
+### 8.3 Add a Copilot Skill (no Claude skill counterpart needed)
 
-1. Create `.github/prompts/<name>.prompt.md` with `mode` + `description` frontmatter.
-2. `mode: ask` for analysis/output prompts that don't read or write files; `mode: agent` for prompts that must read/write the workspace.
-3. Body is the brief Copilot follows. No required sections.
+1. Create `.github/skills/<name>/SKILL.md` with `name`, `description`, and `mode` frontmatter (see §4.4).
+2. `mode: ask` for analysis/output skills that don't read or write files; `mode: agent` for skills that must read/write the workspace.
+3. Body is the full skill instruction — free-form, no required sections.
 4. Run `generate_catalog.py`.
 
 ### 8.4 Add a script
@@ -502,7 +502,7 @@ The PR template auto-checks most of this. The validators and `generate_catalog.p
    - `README.md` — anything in §"Repo Structure", §"Naming Conventions", §"Architecture Decisions"
    - `CONTRIBUTING.md` — anything in §"Adding a Skill", §"Adding an Agent", §"Agent Required Structure", §"SKILL.md Required Sections", §"PR Checklist"
    - `.claude/skills/meta/add-skill/SKILL.md` and `add-agent/SKILL.md` and `new-skill/SKILL.md` and `new-agent/SKILL.md` if their workflow text needs to match
-   - `.github/prompts/add-skill.prompt.md` and `add-agent.prompt.md` likewise
+   - `.github/skills/add-skill/SKILL.md` and `.github/skills/add-agent/SKILL.md` likewise
    - `.claude/agents/agent-skill-manager.agent.md` and `.github/agents/agent-skill-manager.agent.md` if their validation rules section needs to match
 5. Run `python scripts/repo/generate_catalog.py` once more in case any frontmatter changed.
 6. Open a PR titled `chore(meta): update INSTRUCTIONS.md for <reason>` with a short description of what structural change triggered the update.
