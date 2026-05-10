@@ -69,6 +69,7 @@ For each:
 - `post_processing` is ONE function — never split it per SP
 - Dummy `@register_function` functions have body `pass`; real ones have full logic
 - `utils_functions` import lists specific names: never `import *`
+- **Never re-aggregate in `post_processing`.** The DataFrame arriving here is already correctly aggregated by the SP SQL. Do not apply `mean()`, `AVG`, or `groupby().agg()` on ratio or price columns — doing so re-introduces weighted-average errors the SP was designed to avoid. Only rounding, melting, renaming, and sorting belong here.
 
 ### `get_release_dates` pattern
 ```python

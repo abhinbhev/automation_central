@@ -47,8 +47,10 @@ When creating items from freetext or meeting notes:
 
 - Always ask before modifying or deleting existing work items
 - Never create items in a project/team the user hasn't confirmed
+- Assume org and project are set as defaults, only ask if error occurs or if user explicitly wants to switch context
 - Use `run_in_terminal` to fall back to `az boards` / `az devops` CLI when MCP tools are unavailable
 - Use `az boards work-item show --id <ID>` to query items, `az boards work-item update` to patch fields
+- When `run_in_terminal` is unavailable (e.g. in Copilot CLI context), use the `powershell` tool to run commands instead — behaviour is equivalent
 
 ## Relevant Skills
 

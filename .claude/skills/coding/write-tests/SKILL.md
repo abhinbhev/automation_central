@@ -36,3 +36,4 @@ A complete `test_<module>.py` file with:
 3. For each: enumerate happy path, edge cases, and error scenarios
 4. Write the test file
 5. Flag anything that's hard to unit test and suggest an integration test approach
+6. Always ask the user if they want an HTML version of the test report. If yes, generate a detailed HTML report covering: every test case name and description, inputs used, expected vs actual outputs, pass/fail status, any mocking setup applied, and a summary section with total counts and any flagged untestable paths.

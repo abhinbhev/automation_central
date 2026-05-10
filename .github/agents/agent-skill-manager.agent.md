@@ -94,6 +94,7 @@ You are the agent-skill-manager for the `automation_central` repo. You are respo
 - If `requires_script: true`, verify the script path exists before writing the SKILL.md
 - If a domain is not in the validator's allowed list, flag it and update `validate_skill.py` first
 - Always populate `skills:` frontmatter and `## Relevant Skills` section when creating agents — run the audit script after to confirm 100% utilization
+- When `run_in_terminal` is unavailable (e.g. in Copilot CLI context), use the `powershell` tool to run commands instead — behaviour is equivalent
 
 ## Relevant Skills
 

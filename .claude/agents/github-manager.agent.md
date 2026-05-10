@@ -55,6 +55,7 @@ When working with pull requests:
 - Never merge a PR without user confirmation
 - Do not create repos or transfer ownership without explicit approval
 - Flag PRs with no linked work item — suggest adding `AB#ID` reference
+- When `run_in_terminal` is unavailable (e.g. in Copilot CLI context), use the `powershell` tool to run commands instead — behaviour is equivalent
 
 ## Relevant Skills
 

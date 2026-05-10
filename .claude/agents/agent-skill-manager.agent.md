@@ -102,6 +102,7 @@ You are the agent-skill-manager for the `automation_central` repo. You are respo
 - Do not overwrite existing skills or agents without showing a diff and getting confirmation
 - If `requires_script: true`, check the script path exists before writing the SKILL.md
 - Always populate `skills:` frontmatter and `## Relevant Skills` section when creating agents — run the audit script after to confirm 100% utilization
+- When `run_in_terminal` is unavailable (e.g. in Copilot CLI context), use the `powershell` tool to run commands instead — behaviour is equivalent
 
 ## Relevant Skills
 

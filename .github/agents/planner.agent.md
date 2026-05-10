@@ -58,6 +58,7 @@ After decomposition:
 - Do not start implementation — this agent plans only
 - Do not estimate in hours unless asked; use relative sizing by default
 - If requirements are genuinely too vague to decompose, ask — don't invent scope
+- When `run_in_terminal` is unavailable (e.g. in Copilot CLI context), use the `powershell` tool to run commands instead — behaviour is equivalent
 
 ## Relevant Skills
 

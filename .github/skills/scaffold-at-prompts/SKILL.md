@@ -149,7 +149,7 @@ Output: General Instructions → numbered Summary rules → numbered Conclusion 
 
 Ask:
 - Domain equivalences — synonym groups to treat as identical
-- System auto-behaviors that must never be penalized (enumerate ALL pipeline defaults: auto prior-period, auto delta, auto time default, all-rows default when top-k not specified, etc.)
+- System auto-behaviors that must never be penalized (enumerate ALL pipeline defaults: auto prior-period, auto delta, auto time default, all-rows default when top-k not specified, etc.). **Also include**: metrics returning `NULL` for segments where the denominator/weight is zero (e.g. ROI returning NULL when a segment has no media spend in that period) — this is correct SP behavior, not missing data, and must not be penalized.
 - Hard failure conditions — patterns that must always be flagged
 - FSL grading examples (default: `*Empty*`)
 

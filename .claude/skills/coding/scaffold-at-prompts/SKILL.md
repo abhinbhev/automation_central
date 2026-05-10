@@ -171,7 +171,7 @@ Generate `at_complex_summarizer/<function_name>/prompt.md` using the **Complex S
 ### Step 7 — `at_response_evaluator`
 Ask:
 - Domain equivalences — synonym groups the evaluator must treat as identical (ask user; do not invent)
-- System auto-behaviors that must never be penalized — ask user to enumerate ALL pipeline defaults (e.g. auto-including prior-period comparison, auto-calculating delta, defaulting time period when absent, returning all rows when top-k requested)
+- System auto-behaviors that must never be penalized — ask user to enumerate ALL pipeline defaults (e.g. auto-including prior-period comparison, auto-calculating delta, defaulting time period when absent, returning all rows when top-k requested). **Also include**: metrics returning `NULL` for segments where the weight is zero (e.g. ROI returning NULL when there is no media spend in a segment for that period) — this is correct SP behavior, not a data gap.
 - Hard failure conditions — response patterns that must always be flagged (ask: missing required entity, unsupported format, metric mismatch, etc.)
 - FSL grading examples (optional; default `*Empty*`)
 
