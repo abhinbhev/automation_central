@@ -20,7 +20,7 @@ The skill emits **one Python file** per fact table — nothing else (no wrappers
 **Inputs collected in order:**
 
 ### Step 1 — Identity
-- **Output file path** — full path; the skill is repo-agnostic
+- **Output file path** — full path; the skill is repo-agnostic. File name should follow `get_<domain>_kpis.py` convention (e.g. `get_impact_kpis.py`, `get_roi_kpis.py`, `get_price_kpis.py`).
 - **Method name** — `snake_case`, must start with `get_`; drives PascalCase class name (strip `get_` prefix)
 - **SQL dialect** — Databricks SQL / Snowflake / BigQuery / Postgres / T-SQL / MySQL
 
@@ -41,6 +41,7 @@ The skill emits **one Python file** per fact table — nothing else (no wrappers
 - Does the dataset have a time dimension?
 - **Default: canonical** (`year` int + `period` quarter/half/month/FY codes + `period_type` granularity tag)
 - Only tailor if the user explicitly says their time model differs (weekly, fiscal-year offset, date-only, etc.)
+- **Ask explicitly: is the time dimension at weekly or sub-monthly granularity?** If yes, `normalize_time`'s quarterly period-code logic (Q1/Q2/FY/H1/H2) will not apply — adapt to use `year` + `week_number` (or `iso_week`) instead, and drop period/period_type from the signature. Time parameters remain `year`, `quarter`, `week`, etc. — never encode periods as "Period A / Period B" text literals.
 
 ### Step 5 — Release-date semantics
 - **Default: quarterly cutoff** at 15th of next quarter's first month — confirm once: *"Quarterly publish cadence — keep, change, or omit?"*
@@ -61,11 +62,32 @@ For each filter parameter:
 - Known value-fix hardcodes (e.g. `"megabrand" → "mega brand"`) — emit only what the user supplies
 
 ### Step 8 — Measure pattern (pick one)
-- **Variant A** — column-list whitelist; `SUM(f.<col>) as <col>` per selected measure; ask for full whitelist and default subset
+- **Variant A** — column-list whitelist; aggregate per selected measure; ask for full whitelist and default subset
 - **Variant B-kpi** — single `value` column; extra `kpi_dim(kpi, sub_kpi)`; filter on kpi/sub_kpi
 - **Variant B-imagery** — 1–2 fixed measures; `metric="across"` expands to all; includes `debug_mode`
 - **Variant C** — denormalized fact; brand-attr filters go in outer WHERE; no brand-dim subquery
 - **Variant D** (composite SP) — refuse; document as hand-write only
+
+For Variants A, B-kpi, and C, **classify each measure column by aggregation type** (ask the user for each):
+
+| Type | When to use | SQL pattern |
+|---|---|---|
+| **Additive** | Raw counts, volumes, costs, spend — quantities that sum correctly | `SUM(f.col)` |
+| **Pre-computed ratio** | ROI, rates, shares — stored as a result, not raw components | `SUM(f.col * w.weight) / NULLIF(SUM(w.weight), 0)` or `SUM(f.num) / NULLIF(SUM(f.den), 0)` |
+| **Rate / index** | CPI, weather, distribution % — economy-wide or relative indices | `AVG(f.col)` |
+| **Mixed-type** | One column storing different signal types (e.g. spend AND rates) | `CASE WHEN LOWER(s.type) = 'x' THEN SUM(f.col) ELSE AVG(f.col) END` |
+
+For **pre-computed ratios**, ask:
+- Are both numerator and denominator stored separately on the fact? → use `SUM(num) / NULLIF(SUM(den), 0)` directly
+- Only the final ratio is stored? → ask for a weight column (volume, spend, units) to use as a proxy → use volume-weighted mean; requires joining the weight table
+- Which table provides the weight, and what JOIN key links it to the fact?
+
+For **mixed-type** signals, ask:
+- Which dimension column indicates the type (e.g. `dim_signal.subcategory`)?
+- Which value(s) of that column map to additive behavior (e.g. `'media'` = spend → `SUM`)?
+- What should all other values do (`AVG` is the safe default for rates and binary flags)?
+
+**Guard weight-table JOINs** with a `need_weight = "<metric>" in requested_metrics` flag — only emit the JOIN when the weighted metric is actually requested, to keep the query lean when the user asks for a subset of metrics.
 
 ### Step 9 — Runtime optimizations
 - Are string filter columns stored lowercase in the warehouse? (affects `LOWER(col)` vs lowercase-input)
@@ -437,6 +459,77 @@ WHERE 1=1
 """
 ```
 
+### Aggregation Correctness Patterns
+
+**Never use `AVG()` on a pre-computed ratio column.** Averaging ratios ignores the magnitude of each row's denominator, producing a mathematically incorrect result when row sizes differ. Use one of these patterns instead.
+
+#### Pattern 1 — Sum-over-sum ratio (numerator + denominator on same fact)
+
+Use when both components are stored directly on the fact table:
+
+```sql
+SUM(f.numerator_col) / NULLIF(SUM(f.denominator_col), 0) AS metric_name
+```
+
+Example: ROI where `fact_roi.revenue` and `fact_roi.spend` are both present:
+```sql
+SUM(fr.revenue) / NULLIF(SUM(fr.spend), 0) AS roi
+```
+
+#### Pattern 2 — Volume-weighted mean (pre-computed ratio, weight from joined table)
+
+Use when only the ratio value is stored on the fact and a natural weight (volume, units, spend) lives on another table:
+
+```sql
+SUM(f.ratio_col * w.weight_col) / NULLIF(SUM(w.weight_col), 0) AS metric_name
+```
+
+Example: average price weighted by volume, joining `fact_actual_volume av`:
+```sql
+SUM(fp.price_lcu * av.true_volume_hl) / NULLIF(SUM(av.true_volume_hl), 0) AS price_cop
+```
+
+The weight table JOIN uses the same dimensional key as the fact (`date_id`, `entity_id`, `country_code`, etc.).
+
+#### Pattern 3 — Conditional aggregation by signal type (CASE-based SUM / AVG)
+
+Use when a single measure column stores values of different natures depending on a type dimension:
+
+```sql
+CASE
+    WHEN LOWER(s.subcategory) = 'media' THEN SUM(f.input_value)
+    ELSE AVG(f.input_value)
+END AS input_level
+```
+
+The type dimension (`dim_signal`, `dim_kpi`, etc.) must already be joined. This pattern only produces a meaningful result when the query groups by the type dimension — if the query collapses across types, SQLite/Databricks will pick an arbitrary subcategory for the CASE; document this known limitation in the class docstring.
+
+#### Pattern 4 — Conditional weight-table JOIN guard
+
+When Pattern 2 applies only to a subset of the requested metrics, guard the extra JOIN so it is only emitted when needed:
+
+```python
+need_weight = "price_cop" in metric_f  # or however the metric list is determined
+...
+weight_join = ""
+if need_weight:
+    weight_join = f"""
+INNER JOIN (
+    SELECT date_id, entity_id, country_code, SUM(volume_col) AS volume_col
+    FROM {weight_table_fqn}
+    WHERE 1=1
+      [AND country_code IN ({country_list})]
+    GROUP BY date_id, entity_id, country_code
+) w ON f.date_id = w.date_id AND f.entity_id = w.entity_id AND f.country_code = w.country_code
+"""
+```
+
+Omitting the JOIN when the metric is absent keeps the query lean and avoids unnecessary row-multiplication.
+
+#### NULLIF on weight sum returns NULL — this is correct
+
+`NULLIF(SUM(weight), 0)` returns `NULL` when the weight sum is zero (e.g. no volume in a segment for that period). The metric column in the result will be `NULL` for that row. This is the semantically correct behavior — there is no meaningful average when the denominator is zero. Do not replace with `0` or a fallback value unless the business explicitly requests it.
+
 ### Public method body responsibilities (in order)
 
 1. Call `_determine_current_period_info` if used
@@ -446,7 +539,8 @@ WHERE 1=1
 5. Call `normalize_time` if used
 6. Convert boolean filters to `True | False | None`
 7. Validate measure selector against whitelist
-8. Dispatch to `_build_query`
+8. Set any conditional JOIN guard flags (e.g. `need_weight = "metric" in metric_f`)
+9. Dispatch to `_build_query`
 
 ### `"across"` SELECT/GROUP BY rule
 
@@ -464,6 +558,7 @@ For every filter that is not `None`:
 | Integer year literals | Skip `_escape_sql_string` for year (already int-validated) |
 | Booleans | `0`/`1` literals, not `True`/`False` strings |
 | Drop unused JOINs | Omit a dim JOIN entirely if no filter and no SELECT col references it |
+| Guard weight JOINs | Only emit weight-table JOIN when the weighted metric is in the requested set |
 | IN lists | Prefer `col IN (...)` over chained `OR`s |
 | GROUP BY | Reuse select_columns (minus aggregates); never ordinals |
 | `WHERE 1=1` | Anchor for conditional clauses |
@@ -482,3 +577,7 @@ Never emit: `SELECT *`, `LIKE '%x%'`, `ORDER BY` (unless asked), correlated subq
 - `__main__` is the primary smoke test — always emit a meaningful invocation, not a placeholder.
 - Variant D (composite SP) calls multiple other SPs and stitches results. It is out of scope — document as hand-write only and refuse to scaffold.
 - Type hints in older SP files sometimes lie (`pd.DataFrame` return type on `_build_query`). Always emit `-> str` for `_build_query`.
+- **Aggregation rule — never `AVG()` a ratio.** Pre-computed ratios (ROI, price per unit, share) stored as a single column must use volume-weighted mean or sum-over-sum. Simple `AVG()` gives wrong results whenever row sizes differ. See Aggregation Correctness Patterns above.
+- **Country-code casing.** `_parse_filter_param` lowercases all values. If the warehouse stores country codes as uppercase (`'CO'`, `'BR'`), emit `LOWER(country_code) = LOWER({esc_c})` — not `country_code = {esc_c}`. Failure to do this causes silent zero-row results for country filters.
+- **Weekly time dim.** If `dim_date` is at weekly granularity, `normalize_time`'s quarterly period-code logic (Q1/Q2/FY/H1/H2) does not apply. Use `year` + `week_number` (or `iso_week`) parameters instead, and drop `period` / `period_type` from the signature. Confirm granularity in Step 4 before scaffolding.
+- **Mixed-type CASE aggregation collapses incorrectly when `across` collapses multiple types.** Document this in the docstring. The fix is to always group by the signal/type dimension when using Pattern 3.
