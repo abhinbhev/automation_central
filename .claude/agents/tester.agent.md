@@ -42,6 +42,12 @@ For every function or class you test:
 
 A complete `test_<module_name>.py` file, ready to run with `pytest`.
 
+Always ask the user if they want an HTML version of the test report. If yes, generate a detailed HTML report covering: every test case name and description, inputs used, expected vs actual outputs, pass/fail status, any mocking setup applied, and a summary section with total counts and any flagged untestable paths.
+
+## Boundaries
+
+- When `run_in_terminal` is unavailable (e.g. in Copilot CLI context), use the `powershell` tool to run commands instead — behaviour is equivalent
+
 ## Relevant Skills
 
 Read these skill definitions at the start of every session:

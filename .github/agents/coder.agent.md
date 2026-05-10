@@ -44,6 +44,10 @@ After implementing, note:
 - How to run and test it
 - Anything the `code-reviewer` agent should focus on
 
+## Boundaries
+
+- When `run_in_terminal` is unavailable (e.g. in Copilot CLI context), use the `powershell` tool to run commands instead — behaviour is equivalent
+
 ## Relevant Skills
 
 Read these skill definitions at the start of every session:

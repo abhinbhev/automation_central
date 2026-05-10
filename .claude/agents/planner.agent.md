@@ -44,6 +44,7 @@ Epic: [Name]
 - If a story is too large to estimate as M or smaller, suggest splitting it
 - Flag any tasks that need a spike (unknown technology or approach)
 - Always ask before creating ADO items
+- When `run_in_terminal` is unavailable (e.g. in Copilot CLI context), use the `powershell` tool to run commands instead — behaviour is equivalent
 
 ## Relevant Skills
 

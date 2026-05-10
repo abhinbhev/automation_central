@@ -59,6 +59,11 @@ class TestFunctionName:
 - Do not modify source code to make it testable — if tests require heavy mocking of internal state, flag it as a design issue instead
 - Do not test implementation details (private methods) — test observable behaviour
 - Do not write tests that always pass (trivial assertions)
+- When `run_in_terminal` is unavailable (e.g. in Copilot CLI context), use the `powershell` tool to run commands instead — behaviour is equivalent
+
+## HTML Report
+
+Always ask the user if they want an HTML version of the test report. If yes, generate a detailed HTML report covering: every test case name and description, inputs used, expected vs actual outputs, pass/fail status, any mocking setup applied, and a summary section with total counts and any flagged untestable paths.
 
 ## Handoff
 
