@@ -73,9 +73,9 @@ npm install -g @modelcontextprotocol/server-msgraph
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| VS Code | Latest | Editor — loads agents, skills, prompts automatically |
+| VS Code | Latest | Editor — loads agents, skills automatically |
 | Claude Code extension | Latest | Runs `.claude/` agents and skills |
-| GitHub Copilot extension | Latest | Runs `.github/` agents and prompts |
+| GitHub Copilot extension | Latest | Runs `.github/` agents and skills |
 | Git | 2.x+ | Version control |
 | Conda (Miniconda or Anaconda) | Latest | Python environment management |
 | Node.js | 18+ | MCP server installation (`npm`) |

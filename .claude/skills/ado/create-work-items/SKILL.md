@@ -19,6 +19,10 @@ If type is not specified, infer it:
 - Technical sub-task → **Task**
 - Defect or regression → **Bug**
 
+For features, create description with a clear problem statemen and gherkin style acceptance criteria. For user stories, follow the "As a [user], I want [feature] so that [benefit]" format in the title and description. For tasks, focus on the specific action to be taken. For bugs, include steps to reproduce and expected vs actual results.
+For tasks, the estimates should be in hours and should be added in both current estimate and remaining work fields.
+For user story, 1 story point should be equivalent to 6 hours of work, and the story points should be added in the "Story Points" field, with a round up. 
+
 ## Output
 
 A structured preview of all work items to be created:

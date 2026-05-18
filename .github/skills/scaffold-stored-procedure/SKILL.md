@@ -111,6 +111,7 @@ Ask for representative `__main__` values (single-country/entity call). Always em
 - Integer year literals (no escaping); boolean filters as `0`/`1`
 - No debug logging outside `debug_mode` block and `__main__`
 - No imports from sibling SP files
+- **FQN mandatory in `_build_query`**: every `FROM` and `JOIN` inside the Python string-builder must use the fully-qualified `<catalog>.<schema>.<table>` name collected in Steps 2–3. Never emit bare table names (e.g. `FROM dim_date` or `FROM fact_impact`) — the warehouse requires the catalog prefix. If the user provides only a bare name in Step 2/3, ask for the catalog and schema before generating the file.
 
 ### `_build_query` logic
 - Build `select_columns` and `group_by_columns` lists incrementally
@@ -160,6 +161,8 @@ need_weight = "price_cop" in metric_f   # set before _build_query
 **`NULLIF` returning NULL is correct** — when `SUM(weight) = 0` for a group (e.g. no volume for a segment that period), the metric returns `NULL`. This is the right behavior; do not substitute `0` unless the business explicitly asks.
 
 **Country-code casing** — `_parse_filter_param` lowercases all values. If the warehouse stores codes as uppercase (`'CO'`, `'BR'`), emit `LOWER(country_code) = LOWER(param)` — not `country_code = param`. Silent zero-row results are the symptom of getting this wrong.
+
+**FQN enforcement** — The FQN collected in Steps 2–3 must appear verbatim in every `FROM` and `JOIN` inside the Python string `_build_query` builds. Never allow bare table names (e.g. `FROM dim_date`) to slip into the emitted SQL — Unity Catalog / BigQuery / Snowflake all require `<catalog>.<schema>.<table>`. If the user provides only a bare name, ask for the full catalog + schema before generating.
 
 ### Output
 Write the file to the user-specified path. Create parent directories if needed. Offer an empty `__init__.py` alongside if one doesn't exist. After writing, print:

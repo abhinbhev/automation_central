@@ -20,7 +20,7 @@ python scripts/repo/generate_catalog.py
 Overwrites `docs/automation-catalog.md` by running the generator script, which produces a fresh catalog containing:
 - All Claude Code skills grouped by domain
 - All Claude Code agents
-- All GitHub Copilot prompts
+- All GitHub Copilot skills
 
 ## When to run
 

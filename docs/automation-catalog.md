@@ -12,6 +12,7 @@ Invoke any skill by typing `/<skill-name>` in Claude Code chat.
 
 | Skill | Description | Script |
 |---|---|---|
+| `/automation-central-board` | Connect the ADO CLI to the Automation Central board — sets org, project, and team defaults so all subsequent ADO commands target this repo's own board. | — |
 | `/create-work-items` | Create ADO work items (Epic / Feature / User Story / Task / Bug) from freetext, meeting notes, or a spec. Handles single items or bulk hierarchy creation. | `scripts/ado/create_work_items.py` |
 | `/pr-linker` | Link GitHub PRs to ADO work items. Adds AB#ID tags to PR descriptions and sets the work item state to Active or In Review. | — |
 | `/release-notes` | Generate formatted release notes from closed ADO work items for a sprint, milestone, or date range. | `scripts/ado/release_notes.py` |
@@ -119,6 +120,7 @@ Use in Copilot Chat: type `/` and select a skill, or reference by name in agent 
 |---|---|---|
 | `/add-agent` | `agent` | Create, validate, and register a new agent for both Claude Code and GitHub Copilot — scaffolds both .agent.md files, runs validators on each, and updates the catalog |
 | `/add-skill` | `agent` | Create, validate, and register a new skill in automation_central — handles both Claude Code skills (.claude/skills/) and Copilot Skills (.github/skills/), scaffolds SKILL.md, runs the validator, fixes errors, and updates the catalog in one workflow |
+| `/automation-central-board` | `agent` | Connect the ADO CLI to the Automation Central board — sets org, project, and team defaults so all subsequent ADO commands target this repo's own board. |
 | `/build-excel-report` | `agent` | Build a formatted Excel report, tracker, or dashboard from a description or data |
 | `/code-review` | `ask` | Review code or a diff against the team's SCM checklist |
 | `/commit-message` | `ask` | Generate a conventional commit message from staged changes, a diff, or a description of what changed |
