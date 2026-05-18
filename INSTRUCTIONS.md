@@ -31,7 +31,7 @@ If anything in this file conflicts with a skill, agent, prompt, validator, or ca
 Central hub for an Anheuser-Busch InBev cross-functional engineering team's AI-assisted automation. It supports **two AI frameworks in parallel** — Claude Code and GitHub Copilot — by providing parallel asset trees that share the same Python scripts and templates underneath.
 
 Anyone on the team opens the repo in VS Code and gets:
-- **Slash commands** (skills/prompts) for repeated workflows
+- **Slash commands** (skills) for repeated workflows
 - **Agent modes** (specialised personas)
 - **Python scripts** for execution that text alone can't do (API calls, file generation)
 

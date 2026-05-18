@@ -122,6 +122,7 @@ A single `.py` file at the user-specified path structured as:
 - No imports from sibling SP files
 - No `Optional[...]` — use `X | None`
 - If parent directory doesn't exist, create it; offer an empty `__init__.py` alongside
+- **FQN mandatory in `_build_query`**: every `FROM` and `JOIN` inside the Python string-builder must use the fully-qualified `<catalog>.<schema>.<table>` name collected in Steps 2–3. Never emit bare table names (e.g. `FROM dim_date`). Store each FQN in a local variable (`fact_fqn`, `dim_date_fqn`, etc.) and interpolate it into the f-string, or hardcode the FQN string directly — but never drop the catalog/schema prefix.
 
 ## Steps
 
@@ -581,3 +582,4 @@ Never emit: `SELECT *`, `LIKE '%x%'`, `ORDER BY` (unless asked), correlated subq
 - **Country-code casing.** `_parse_filter_param` lowercases all values. If the warehouse stores country codes as uppercase (`'CO'`, `'BR'`), emit `LOWER(country_code) = LOWER({esc_c})` — not `country_code = {esc_c}`. Failure to do this causes silent zero-row results for country filters.
 - **Weekly time dim.** If `dim_date` is at weekly granularity, `normalize_time`'s quarterly period-code logic (Q1/Q2/FY/H1/H2) does not apply. Use `year` + `week_number` (or `iso_week`) parameters instead, and drop `period` / `period_type` from the signature. Confirm granularity in Step 4 before scaffolding.
 - **Mixed-type CASE aggregation collapses incorrectly when `across` collapses multiple types.** Document this in the docstring. The fix is to always group by the signal/type dimension when using Pattern 3.
+- **FQN enforcement in `_build_query`.** The FQN collected in Steps 2–3 must appear verbatim in every `FROM` and `JOIN` inside the Python string that `_build_query` builds. Never allow bare table names (e.g. `FROM dim_date` or `FROM fact_impact`) to slip into the emitted SQL — the warehouse requires `<catalog>.<schema>.<table>` for Unity Catalog / BigQuery / Snowflake. If the user provides only a bare name in Step 2/3, ask for the catalog and schema before generating the file.

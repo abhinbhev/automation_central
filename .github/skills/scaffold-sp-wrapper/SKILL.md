@@ -14,8 +14,11 @@ All canonical code patterns are embedded in the Claude skill at `.claude/skills/
 
 ### Step 1 — File identity
 Ask together:
-- Full output file path (`<usecase>_functions.py`)
-- Use case name string (e.g. `gai_copilot_marketing_brand_guidance_ghq`)
+- Full output file path (`<usecase>_functions.py`). **The file name must be `<use_case_name>_functions.py` using the exact `use_case_name` string — do not shorten or alias it.**
+- Use case name string (e.g. `gai_copilot_marketing_brand_guidance_ghq`). This must match:
+  1. The file name prefix
+  2. The subdirectory name under `stored_procedures/` in every lazy import
+  Using a short alias (e.g. `watchtower_mmm` when the SP subdir is `gai_copilot_marketing_watchtower_ghq`) causes `ModuleNotFoundError`. Always confirm the exact subdir name.
 - Logger import path (fallback: `import logging; logger = logging.getLogger(__name__)`)
 
 ### Step 2 — Release-date cache
@@ -48,6 +51,7 @@ For each:
 - Registered name, source name (unique, human-readable), optional aliases
 - Dummy (`pass`) or real orchestrator? If real: which raw wrappers, which params pass through?
 - Docstring (becomes `function_purpose` in LLM prompt — must be complete)
+- **For dummies**: only create one dummy per distinct `source` value in `_SECTION_SOURCE_MAP` — NOT one per intent. Dummies are section label stubs for the multi-answer renderer, not routing targets for the template selector.
 
 ---
 
@@ -67,9 +71,11 @@ For each:
 - `logger.bind(request_id=request_id).info(...)` bind pattern on all operational log lines
 - No `logger.debug` / `logger.trace` — use `logger.info` + `logger.warning` only
 - `post_processing` is ONE function — never split it per SP
-- Dummy `@register_function` functions have body `pass`; real ones have full logic
+- Dummy `@register_function` functions have body `pass` — create only as many as there are distinct `source` values in `_SECTION_SOURCE_MAP` (plus a generic fallback like `dummy_analysis`). Do NOT create one dummy per intent — this over-bloats the registry and misleads the template selector LLM.
 - `utils_functions` import lists specific names: never `import *`
 - **Never re-aggregate in `post_processing`.** The DataFrame arriving here is already correctly aggregated by the SP SQL. Do not apply `mean()`, `AVG`, or `groupby().agg()` on ratio or price columns — doing so re-introduces weighted-average errors the SP was designed to avoid. Only rounding, melting, renaming, and sorting belong here.
+- **Name alignment is mandatory.** The `use_case_name` string, the functions file name prefix, and the `<usecase>` token in every lazy import (`from .stored_procedures.<usecase>.<module>`) must all be the same string. Confirm the exact SP subdirectory name with the user — never invent a short alias.
+- **Multi-SP orchestrators return a list, not a tuple.** When an intent routes to more than one SP (e.g. `cpi_decomposition`, `media_full_picture`), the return value is `list[dict]` of section results — NOT a `pd.concat`-merged 4-tuple. Never flatten multi-SP results into one DataFrame; the downstream LangGraph node checks `isinstance(result, list)` to handle each section independently. Add `section_name: str = "analysis"` as an orchestrator parameter and use `_SECTION_SOURCE_MAP` to give each SP result a human-readable label. The 1-result degenerate case (`len(results) == 1`) still returns a 4-tuple for backward compatibility. See Claude skill for the full pattern.
 
 ### `get_release_dates` pattern
 ```python

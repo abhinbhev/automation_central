@@ -219,5 +219,22 @@ python scripts/git/pr_description.py --base main
 
 ## TODO:
 
-1. Ingest EDA skill
+1. Ingest EDA for IC skill
 2. Add DE agent
+3. improve at skill
+4. add teams manager agent + skills
+5. add outlook manager agent + skills
+6. add overall agent that can call other agents as needed
+7. add agent/skill usage tracking (analytics)
+8. add feedback loop for users to rate skill outputs and improve them over time - add a resolution skill that automates the process of reviewing feedback and generating plans for improvement based on it periodically (e.g. monthly)
+9. add a dummy agent that can act as a new user and rate the quality of other agents' outputs to identify areas for improvement - make this a mandatory check in the PR process for new skills/agents
+10. add a "sync check" script to validate that Claude and Copilot assets are in sync (same agents/skills with same descriptions and tags)
+11. add automated tests for new skills and agents grounded in example inputs/outputs to prevent regressions
+12. add quickstart guide for the repo and for each agent/skill to the README for easy onboarding of new team members
+13. add strict pre commit hooks to enforce code quality and style standards on all scripts and markdown files
+14. add an info agent which can answer questions about the repo structure, how to contribute, and where to find resources to help onboard new users and assist existing users in finding what they need quickly, but does not have access to execute any skills or agents itself or edit any files - this agent is purely informational to help users navigate the repo and understand how to use it effectively without needing to read through documentation
+15. add a patch note agent which can automatically generate release notes based on merged PRs and their descriptions and send them out in a newsletter format to stakeholders on a regular cadence (e.g. monthly) to keep everyone informed of new automations and improvements without needing to check the repo or catalog manually
+16. add agent level ground truths which run automatically via a ci pipeline every PR to validate that the agent can perform its intended function with a certain level of quality before being merged - this could be a set of test cases or scenarios that the agent must be able to handle effectively to ensure that new agents meet a baseline standard of performance and reliability before being added to the catalog
+17. Add workflows that chain multiple agents together for more complex known automation scenarios (e.g. a "release management" workflow that uses the release notes agent, the info agent, and the email draft agent to automate the entire release communication process)
+18. Connect ms graph api to enable calendar management, email management, and teams message management skills and agents to automate scheduling, communication, and collaboration tasks directly through the repo's agents
+19. Add a "personal assistant" agent that can help users manage their daily tasks, schedule, and communications by leveraging the various skills in the repo to automate common personal productivity tasks like scheduling meetings, drafting emails, setting reminders, and summarizing information across different platforms (e.g. email, calendar, teams) 

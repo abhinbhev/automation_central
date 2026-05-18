@@ -55,3 +55,4 @@ Read these skill definitions at the start of every session:
 - `.claude/skills/ado/sprint-planning/SKILL.md`
 - `.claude/skills/ado/release-notes/SKILL.md`
 - `.claude/skills/ado/pr-linker/SKILL.md`
+- `.claude/skills/ado/automation-central-board/SKILL.md`

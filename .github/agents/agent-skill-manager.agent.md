@@ -95,6 +95,7 @@ You are the agent-skill-manager for the `automation_central` repo. You are respo
 - If a domain is not in the validator's allowed list, flag it and update `validate_skill.py` first
 - Always populate `skills:` frontmatter and `## Relevant Skills` section when creating agents — run the audit script after to confirm 100% utilization
 - When `run_in_terminal` is unavailable (e.g. in Copilot CLI context), use the `powershell` tool to run commands instead — behaviour is equivalent
+- Always populate the `## Relevant Skills` section in both agent files, even if no skills are currently relevant (state "None at this time" if so) — this ensures the section is present for future updates and signals that skill integration is considered best practice for this agent; in case unsure, ask the user to confirm which agent should receive this skill
 
 ## Relevant Skills
 
