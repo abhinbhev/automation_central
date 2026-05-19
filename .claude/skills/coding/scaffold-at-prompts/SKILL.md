@@ -81,6 +81,7 @@ Ask the user to supply all domain content; do not assume any value:
 - **Acronym expansion table** — domain abbreviations and their full expansions; ask user for each pair
 - **Composite → expansion mappings** — shorthand expressions that should expand to a list of values (e.g. a regional grouping → list of specific locations, a metric family name → list of individual metric names)
 - **Synonym mappings** — natural language terms that must be normalized to a canonical domain term
+  > **Intent synonym pattern (recommended):** Map colloquial phrasing → table-name intent + optional dimension note (rather than a semantic intent name that bakes dimension assumptions in). Example: `"media ROI"`, `"advertising return"` → `roi` *(note: subcategory=Media)*. This keeps the enhancer thin — it normalizes the intent name, and the arguments selector extracts the dimension filter.
 - **Anti-expansion words** — terms that look expandable but must NOT be touched (ask user)
 - **Query-level defaults** — any implicit behaviors the enhancer should enforce (e.g. default time granularity, default aggregation level)
 
@@ -93,6 +94,8 @@ Ask:
 - Priority ordering: which function wins when two could apply — ask user to rank from most to least specific
 - 15–25 disambiguation examples: user query → correct function → one-line reasoning; ask for intentionally ambiguous edge cases
 - Tie-breaking rules: hard cases the priority ordering alone cannot resolve
+
+> **Intent name reminder:** When the reasoning column in the examples table references an intent value (not a function name), ensure the intent matches the actual registered intent — not a semantic alias. E.g. write `intent=impact` not `intent=media_impact`. Stale intent references in examples will cause the LLM to emit invalid values.
 
 Generate `at_template_selector/prompt.md` using the **Template Selector structure** in Prompt Structures below.
 
@@ -110,6 +113,13 @@ For each top-level registered function:
 - Special edge case rules (ask user)
 
 Always include the **"only extract what is present" rule** verbatim: do not infer or default any parameter that is absent from the query; the downstream SP class handles defaults at query-build time.
+
+> **Intent parameter design — simple table-name intents (strongly preferred):**
+> When the function has an `intent` parameter, keep intents as plain table names (e.g. `impact`, `input`, `roi`, `volume`, `price`, `cpi`, `cost`) rather than semantic workflow names (e.g. ~~`media_impact`~~, ~~`all_drivers`~~). The arguments selector should extract ALL dimension filters (category, subcategory, signal) as explicit separate parameters — not bundle them into a semantic intent. This means:
+> - The LLM can ask "what media spend looks like" and the selector extracts `intent=input, category=..., subcategory=Media` rather than mapping to a stale `media_spend_trend` intent
+> - The intent table in the prompt shows: intent → fact table → default metric — nothing else
+> - No forced/hidden parameter values in the mapping guide — the user controls all dimensions
+> - Default intent = the most general table for the domain (e.g. `impact` for MMM)
 
 **Standard time parameters (present in most functions):**
 - `year` — 4-digit integers; ranges expand to list; no default (leave absent if not mentioned)
@@ -130,6 +140,15 @@ For each source_name:
 - Additional zero-value suppression rules beyond the universal default?
 - Delta unit label for this use case (e.g. "p.p." for percentage points, "pts" for index points, "%" for raw percent)
 - Company/entity name conventions (e.g. what any abbreviation stands for)
+- **Pivoted column format expected?** — if the data may arrive with year/quarter-pivoted columns (e.g. `impact_hl_2024`, `impact_hl_2025`), add an explicit section in the prompt like:
+  ```
+  ### Pivoted column format
+  When the result contains columns named `<metric>_<year>` or `<metric>_<year><quarter>`
+  (e.g. `impact_hl_2024`, `impact_hl_2025Q1`), these are multi-period comparisons pivoted wide.
+  Treat `<metric>_<year>` as the value of `<metric>` in year `<year>`.
+  Compute and report the change between the pivoted period columns.
+  ```
+  This arises any time `_apply_period_pivot` in `post_processing` fires (multi-year or multi-quarter queries).
 
 Apply all **12 universal base rules** automatically (do not ask — these are non-negotiable):
 1. Analyze data for trends across cuts; identify key or notable shifts
@@ -171,7 +190,9 @@ Generate `at_complex_summarizer/<function_name>/prompt.md` using the **Complex S
 ### Step 7 — `at_response_evaluator`
 Ask:
 - Domain equivalences — synonym groups the evaluator must treat as identical (ask user; do not invent)
-- System auto-behaviors that must never be penalized — ask user to enumerate ALL pipeline defaults (e.g. auto-including prior-period comparison, auto-calculating delta, defaulting time period when absent, returning all rows when top-k requested). **Also include**: metrics returning `NULL` for segments where the weight is zero (e.g. ROI returning NULL when there is no media spend in a segment for that period) — this is correct SP behavior, not a data gap.
+- System auto-behaviors that must never be penalized — ask user to enumerate ALL pipeline defaults (e.g. auto-including prior-period comparison, auto-calculating delta, defaulting time period when absent, returning all rows when top-k requested). **Also include**:
+  - Metrics returning `NULL` for segments where the weight is zero (e.g. ROI returning NULL when there is no media spend in a segment for that period) — this is correct SP behavior, not a data gap
+  - **Wide pivoted column format** when multiple years/quarters are queried — results may arrive as `metric_2024`, `metric_2025` columns rather than long-format rows; this is expected `post_processing` behavior, not a missing-column error
 - Hard failure conditions — response patterns that must always be flagged (ask: missing required entity, unsupported format, metric mismatch, etc.)
 - FSL grading examples (optional; default `*Empty*`)
 

@@ -321,13 +321,110 @@ def post_processing(df: pd.DataFrame, stored_proc_name: str, ...) -> pd.DataFram
 
 Column renames (display names differ from SQL names) go in `post_processing`, not in the wrapper.
 
+### Universal period pivot helper — `_apply_period_pivot`
+
+When a query spans multiple years or quarters, long-format results (one row per period) are hard to compare. Add this helper and call it at the **end** of `post_processing` to pivot the data wide.
+
+```python
+_KNOWN_METRICS = {
+    "impact_hl", "nr_lcu", "roi", "actual_hl", "predicted_hl", "smoothed_hl",
+    "input_level", "price_cop", "cpi", "cpi_raw", "cost",
+    # add use-case-specific metric column names here
+}
+
+_known_dim_cols = {
+    "country", "brand", "category", "subcategory", "signal", "display_name",
+    "year", "quarter", "month", "week", "period", "is_forecast",
+    "week_of_year", "source",
+}
+
+def _apply_period_pivot(df: pd.DataFrame) -> pd.DataFrame:
+    """Pivot multi-period results wide so each period becomes a column group.
+    
+    Decision rules (checked in order):
+    1. week present → skip (50+ pivot columns; too wide for LLM consumption)
+    2. multi-year + quarter → pivot label: "2024Q1", "2025Q3"
+    3. multi-year only → pivot label: "2024", "2025"
+    4. single year + multi-quarter → pivot label: "Q1", "Q2"
+    5. multi-month → pivot label: "Jan", "Feb"
+    6. single period → no pivot; return as-is
+    """
+    try:
+        if "week" in df.columns and df["week"].nunique() > 1:
+            return df  # rule 1
+
+        has_year = "year" in df.columns
+        has_quarter = "quarter" in df.columns
+        has_month = "month" in df.columns
+
+        multi_year = has_year and df["year"].nunique() > 1
+        multi_quarter = has_quarter and df["quarter"].nunique() > 1
+        multi_month = has_month and df["month"].nunique() > 1
+
+        if not (multi_year or multi_quarter or multi_month):
+            return df  # rule 6
+
+        # Build the pivot label
+        if multi_year and has_quarter:                         # rule 2
+            df["_pivot_label"] = df["year"].astype(str) + df["quarter"].str.upper()
+            period_col = "_pivot_label"
+        elif multi_year:                                       # rule 3
+            period_col = "year"
+        elif multi_quarter:                                    # rule 4
+            period_col = "quarter"
+        else:                                                  # rule 5 — multi-month
+            month_map = {1:"Jan",2:"Feb",3:"Mar",4:"Apr",5:"May",6:"Jun",
+                         7:"Jul",8:"Aug",9:"Sep",10:"Oct",11:"Nov",12:"Dec"}
+            df["_pivot_label"] = df["month"].map(month_map)
+            period_col = "_pivot_label"
+
+        # Detect metric columns using allowlist first, dtype fallback second
+        metric_cols = [c for c in df.columns if c in _KNOWN_METRICS]
+        if not metric_cols:
+            metric_cols = [
+                c for c in df.columns
+                if c not in _known_dim_cols
+                and df[c].dtype in (float, int)
+            ]
+
+        dim_cols = [
+            c for c in df.columns
+            if c not in metric_cols
+            and c != period_col
+            and c not in ("_pivot_label", "year", "quarter", "month", "week")
+        ]
+
+        if not metric_cols or not dim_cols:
+            return df  # not enough structure to pivot
+
+        pivoted = pd.pivot_table(
+            df, values=metric_cols, index=dim_cols,
+            columns=period_col, aggfunc="first",
+        )
+        pivoted.columns = [f"{metric}_{period}" for metric, period in pivoted.columns]
+        pivoted = pivoted.reset_index()
+
+        if "_pivot_label" in df.columns:
+            pivoted = pivoted.drop(columns=["_pivot_label"], errors="ignore")
+        return pivoted
+
+    except Exception:
+        return df  # always fall back to original on any pivot failure
+```
+
+> ⚠️ **Metric detection**: always use `_KNOWN_METRICS` allowlist as the primary check. Never rely solely on `dtype == float/int` — numeric dim columns (e.g. `is_forecast: 0/1`, `week_of_year: 1–52`) will be misclassified as metrics if dtype inference is the only guard.
+
+> ⚠️ **`aggfunc="first"` assumption**: the pivot assumes no duplicate (dim_cols, period) combinations in the result. This holds when the query groups at the same granularity every period. If duplicates are possible, use `aggfunc="sum"` for additive metrics and document the choice.
+
 ### `@register_function` patterns
 
 **Dummy (section label for multi-answer flows — body is always `pass`):**
 
 Dummies are **not** one-per-intent. They are section label stubs used by the multi-answer response renderer to label each result section. You only need one dummy per distinct `source` value that appears in `_SECTION_SOURCE_MAP`. The real orchestrator (with `_INTENT_MAP`) handles all routing — the template selector LLM points at the real orchestrator, not at individual dummies.
 
-Section comment: `# <n>. Dummy Section Functions (only section names used in multi-answer flows)`
+> **Watchtower-style pattern (recommended)**: When every intent maps to its own section name (e.g. `impact→"Impact"`, `roi→"ROI"`), create one dummy per intent. This makes every result section addressable by the summarizer prompt router, even for single-SP intents. Only strictly necessary for multi-SP intents, but having a dummy for every section is clean and explicit.
+
+Section comment: `# <n>. Dummy Section Functions (one per section name in _SECTION_SOURCE_MAP)`
 
 ```python
 @register_function("dummy_<section_label>", "<Human Section Name>")
@@ -335,7 +432,7 @@ async def dummy_<section_label>():
     pass
 ```
 
-Example — if `_SECTION_SOURCE_MAP` references `"Media Impact"`, `"Media Spend Trend"`, `"Media ROI"`, `"Price Effect on Volume"`, `"CPI Decomposition"`, and a generic `"Analysis"` fallback, you need exactly 6 dummies — one per distinct source name. Do **not** create a dummy for every intent in `_INTENT_MAP`.
+Example — if `_SECTION_SOURCE_MAP` has entries for `Impact`, `Input`, `ROI`, `Volume`, `Price`, `CPI`, `Cost`, create exactly 7 dummies — one per section name. Do **not** create dummies for intent names; dummies match section names (the values in `_SECTION_SOURCE_MAP`).
 
 **Real orchestrator — single-SP (4-tuple return):**
 ```python
@@ -352,12 +449,16 @@ async def get_factual_data(request_id, <params>: str = None, ...):
     return df, query, table_refs, stored_proc
 ```
 
-**Real orchestrator — multi-SP intent router (returns list of dicts for complex intents):**
+**Real orchestrator — multi-SP intent router (unified loop pattern):**
 
-When an orchestrator can dispatch to *one* SP (single intent) **or** multiple SPs (e.g. `cpi_decomposition` = price + cpi, `media_full_picture` = impact + input + roi), use two return paths:
+> **Design principle — simple table-name intents (recommended):**
+> Intent values should be plain table names (e.g. `impact`, `input`, `roi`, `volume`, `price`, `cpi`, `cost`), not semantic workflow names (e.g. ~~`media_impact`~~, ~~`all_drivers`~~, ~~`cpi_decomposition`~~).
+> - The LLM extracts **all** dimension filters explicitly (category, subcategory, signal, metric) — no forced params in `_INTENT_MAP`
+> - Intent = SP routing only
+> - When a user asks a semantic question ("media ROI"), the arguments selector maps it to the correct intent + explicit dimension params
+> - This keeps `_INTENT_MAP` clean and makes the system easier to extend
 
-1. **Single-SP path**: run the correct raw wrapper, apply `post_processing`, return the standard 4-tuple.
-2. **Multi-SP path**: run all SPs, collect results, return a **list of section dicts** — one dict per SP result. The downstream LangGraph node checks the return type (`isinstance(result, list)`) to decide how to handle it.
+Use a **unified loop** that handles both single-SP and multi-SP intents in the same code path:
 
 ```python
 @register_function("get_data", "Factual Data", aliases=["getData"])
@@ -368,51 +469,66 @@ async def get_data(
     <...params...>,
     use_case_name: str = "<usecase>",
 ):
-    """Routes to the correct SP(s) based on intent. Supports: intent_a, intent_b, multi_intent_c."""
+    """Routes to the correct SP based on intent. Valid intents: impact, input, roi, volume, price, cpi, cost."""
     from .utils_functions import clean_and_join_values, get_change_columns
 
     intent = clean_and_join_values(intent) or "default_intent"
     section_name = clean_and_join_values(section_name) or "analysis"
     # ... clean all params ...
 
+    # Intent maps to a fact table (SP name). No dimension filters forced.
+    # The LLM extracts category/subcategory/signal/metric explicitly.
     _INTENT_MAP = {
-        "single_intent":  {"sp": "wrapper_a", "metric": "metric_x"},
-        "multi_intent_c": {"sp": ["wrapper_b", "wrapper_c"], "metric": "m1|||#$#|||m2"},
+        "impact":  {"sp": "impact",         "metric": "impact_hl"},
+        "input":   {"sp": "input",          "metric": "input_level"},
+        "roi":     {"sp": "roi",            "metric": "roi"},
+        "volume":  {"sp": "volume",         "metric": "actual_hl"},
+        "price":   {"sp": "price",          "metric": "price_cop"},
+        "cpi":     {"sp": ["price", "cpi"], "metric": "price_cop|||#$#|||cpi"},
+        "cost":    {"sp": "cost",           "metric": "cost"},
     }
-    config = _INTENT_MAP.get(intent, _INTENT_MAP["default_intent"])
+    config = _INTENT_MAP.get(intent, _INTENT_MAP["impact"])
     sp_target = config["sp"]
+    sp_names = [sp_target] if isinstance(sp_target, str) else list(sp_target)
+    is_single_intent = isinstance(sp_target, str)
 
-    # ── Single-SP path ────────────────────────────────────────────────────────
-    if isinstance(sp_target, str):
-        df, query, table_refs, stored_proc = await <raw_wrapper>(**common_kwargs, ...)
-        if not df.empty:
-            df = await post_processing(df, stored_proc_name=stored_proc)
-        return df, query, table_refs, stored_proc   # standard 4-tuple
-
-    # ── Multi-SP path — return list of structured section dicts ───────────────
+    # Maps intent → stored_proc name → display section name.
+    # Include ALL intents explicitly (even single-SP) for clarity.
     _SECTION_SOURCE_MAP = {
-        "multi_intent_c": {
-            "get_wrapper_b": "Human Label B",
-            "get_wrapper_c": "Human Label C",
+        "impact": {"get_impact_kpis": "Impact"},
+        "input":  {"get_input_kpis":  "Input"},
+        "roi":    {"get_roi_kpis":    "ROI"},
+        "volume": {"get_volume_kpis": "Volume"},
+        "price":  {"get_price_kpis":  "Price"},
+        "cost":   {"get_cost_kpis":   "Cost"},
+        "cpi": {
+            "get_price_kpis": "Price",
+            "get_cpi_kpis":   "CPI",
         },
     }
 
+    # ── Unified loop — runs all mapped SPs ───────────────────────────────────
     results = []
-    for sp_name in sp_target:
-        df, query, table_refs, stored_proc = await <dispatch>[sp_name]()
+    for sp_name in sp_names:
+        df, query, table_refs, stored_proc = await <dispatch_to_sp>(sp_name, **common_kwargs)
         if not df.empty:
             df = await post_processing(df, stored_proc_name=stored_proc)
         results.append((df, query, table_refs, stored_proc))
 
-    if len(results) == 0:
-        return pd.DataFrame(), None, None, None
-    if len(results) == 1:
-        return results[0]   # degenerate multi → 4-tuple
+    valid = [(df, q, tr, sp) for df, q, tr, sp in results if df is not None and not df.empty]
 
+    if len(valid) == 0:
+        return None, None, None, None, None, None   # 6-tuple of None per executor contract
+
+    if len(valid) == 1:
+        df, query, table_refs, stored_proc = valid[0]
+        records = df.to_dict(orient="records")
+        change_columns = get_change_columns(records)
+        return records, query, None, table_refs, change_columns, stored_proc
+
+    # Multi-result: build section list
     section_results = []
-    for df, query, table_refs, stored_proc in results:
-        if df is None or df.empty:
-            continue
+    for df, query, table_refs, stored_proc in valid:
         records = df.to_dict(orient="records")
         source_name = _SECTION_SOURCE_MAP.get(intent, {}).get(stored_proc, section_name.title())
         section_results.append({
@@ -422,21 +538,18 @@ async def get_data(
             "chart_results": None,
             "table_references": table_refs,
             "change_columns": get_change_columns(records),
-            "stored_proc": f"{stored_proc}:{intent}",
+            "stored_proc": "Watchtower Data",
         })
-
-    if not section_results:
-        return pd.DataFrame(), None, None, None
     return section_results   # list[dict] — NOT a tuple
 ```
 
-**Key rules for multi-SP orchestrators:**
-- Never `pd.concat` multi-SP results into one DataFrame — each SP has different columns and semantics
-- Always include `section_name: str = "analysis"` as a parameter (default `"analysis"`)
-- Use `_SECTION_SOURCE_MAP` to give each SP result a human-readable label keyed on `stored_proc`
-- The `stored_proc` value in the dict uses `f"{stored_proc}:{intent}"` to carry intent context downstream
-- `get_change_columns(records)` requires importing from `utils_functions`; add it to the lazy import list
-- The 1-result degenerate case (`len(results) == 1`) must still return a 4-tuple, not a list
+**Key rules for unified-loop orchestrators:**
+- Never `pd.concat` multi-SP results — each SP has different columns and semantics
+- `_SECTION_SOURCE_MAP` must include ALL intents (not just multi-SP ones) — enables per-intent summarizer prompt routing
+- The `source_name` from `_SECTION_SOURCE_MAP` must exactly match the `at_simple_summarizer/<source_name>/` folder name
+- The 0-result degenerate case must return a 6-tuple of `None` to match the executor contract
+- The 1-result case returns a 6-tuple (records, query, chart, table_refs, change_columns, stored_proc)
+- `get_change_columns(records)` requires importing from `utils_functions`
 
 **`@register_function` decorator behavior:**
 - `name` → key in REGISTRY; must match what the template selector LLM outputs
@@ -452,10 +565,11 @@ async def get_data(
 - **The singleflight inflight dict prevents concurrency storms.** Do not remove it even for low-traffic use cases — it prevents redundant Databricks queries during any burst.
 - **`stored_proc` in the return tuple must match the Langfuse key.** It is used to fetch the correct summarizer prompt. If there is no Langfuse prompt yet, match the naming convention and note that the prompt must be added.
 - **Highlights wrappers return 5-tuples.** The calling LangGraph node checks tuple length before unpacking. Adding a 5-tuple wrapper requires verifying the node handles both shapes.
-- **Dummy functions must have distinct `source_name` values — and only exist for section labels.** Dummies are NOT one-per-intent. Create only as many dummies as there are distinct `source` values in `_SECTION_SOURCE_MAP` (plus a generic fallback like `"dummy_analysis"` / `"Analysis"` if needed). The template selector LLM routes to the real orchestrator; dummies just provide labelling stubs for the multi-answer response renderer. Over-scaffolding dummies (one per intent) bloats the registry and misleads the template selector.
+- **Dummies: one per section name in `_SECTION_SOURCE_MAP`.** Dummies are NOT one-per-intent unless every intent has its own section (Watchtower style). The template selector LLM routes to the real orchestrator; dummies provide labelling stubs for the response renderer.
 - **`post_processing()` is one function, not one per SP.** Never create a separate function per wrapper.
-- **`get_release_dates` `SELECT *` exception:** the static lookup form (`SELECT * FROM <tiny_table>`) is acceptable only for tiny reference tables with no dynamic filtering. Never apply to fact tables.
-- **Column renames (`abi_comp` → `abi_or_competitor`, `life_cycle` → `portfolio_classification`) happen in `post_processing`, not in the wrapper.** Keep internal column names in the wrapper; `post_processing` handles display names.
+- **`get_release_dates` `SELECT *` exception:** the static lookup form is acceptable only for tiny reference tables with no dynamic filtering. Never apply to fact tables.
+- **Column renames happen in `post_processing`, not in the wrapper.** Keep internal column names in the wrapper; `post_processing` handles display names.
+- **Intent design: keep intents simple.** Semantic intents (e.g. `media_impact`, `all_drivers`) that force dimension params are an anti-pattern — they bake LLM-layer decisions into the SP layer, make the system brittle to extend, and produce hard-to-debug errors when users combine signals across categories. Prefer table-name intents + explicit LLM-extracted dims.
 - **Never re-aggregate in `post_processing`.** The DataFrame arriving here is already correctly aggregated by the SP SQL. Do not apply `AVG()`, `mean()`, or `groupby().agg()` on ratio or price columns inside `post_processing` — doing so would re-introduce the same weighted-average error that the SP was carefully designed to avoid. Rounding, melting, renaming, and sorting are the only transformations that belong here.
 - **Name alignment is mandatory.** The `use_case_name` string, the functions file name prefix, and the `<usecase>` token in every lazy import path (`from .stored_procedures.<usecase>.<module>`) must all be the same string. Confirm the exact SP subdirectory name with the user — never invent a short alias.
 - **Multi-SP orchestrators return a list, not a tuple.** When an intent routes to more than one SP (e.g. `cpi_decomposition`, `media_full_picture`), the return value is a `list[dict]` of section results, NOT a `pd.concat`-merged 4-tuple. Never flatten multi-SP results into one DataFrame — each SP has different columns and the downstream node needs to handle them independently. The 1-result degenerate case still returns a 4-tuple for backward compatibility.
