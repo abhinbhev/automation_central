@@ -51,7 +51,7 @@ Ask user to supply all domain values:
 - Dimension allowlists to canonicalize (location names, product codes, segment labels…) — for each: canonical form + approximate user phrasings that map to it
 - Acronym expansions — ask per pair
 - Composite → expansion mappings (shorthand grouping → list of canonical values)
-- Synonym normalizations (natural language term → canonical term)
+- Synonym normalizations (natural language term → canonical term). **Intent synonym pattern (preferred):** map colloquial phrasing → table-name intent + optional dimension note, e.g. `"media ROI"`, `"advertising return"` → `roi` *(note: subcategory=Media)*. Do NOT map to a semantic intent name that bakes dimension assumptions in — keep the enhancer thin.
 - Anti-expansion words (terms that look expandable but must NOT be changed)
 - Query-level defaults the enhancer should enforce
 
@@ -74,6 +74,8 @@ Ask:
 - Priority ordering (user ranks from most to least specific)
 - 15–25 disambiguation examples (query → function → one-line reason); ask for intentionally ambiguous edge cases
 - Tie-breaking rules for hard cases priority alone cannot resolve
+
+> **Intent name reminder:** When the reasoning column in the examples table references an `intent=` value, use the actual registered intent (e.g. `intent=impact`) — not a stale semantic alias (e.g. ~~`intent=media_impact`~~). Stale intent references in examples will cause the LLM to emit invalid argument values.
 
 Output:
 - Role paragraph
@@ -98,6 +100,8 @@ For each registered function:
 
 Always include verbatim: "Do not infer or default any parameter absent from the query; the downstream SP handles defaults at query-build time."
 
+> **Intent parameter design — table-name intents (strongly preferred):** When the function has an `intent` parameter, keep intents as plain table names (e.g. `impact`, `input`, `roi`, `volume`, `price`, `cpi`, `cost`) — NOT semantic workflow names (e.g. ~~`media_impact`~~, ~~`all_drivers`~~). The arguments selector extracts ALL dimension filters (category, subcategory, signal, metric) as explicit separate parameters. Intent = SP routing only; no forced/hidden params. The intent table in the prompt should show: intent → fact table → default metric — nothing else. Default intent = the most general table for the domain.
+
 ### Step 5 — at_simple_summarizer (loop per source_name)
 
 For each source_name:
@@ -109,6 +113,13 @@ For each source_name:
 - Reporting conventions (unit, index vs. percentage, rounding, paired metrics)
 - Delta unit label ("p.p.", "pts", "%" — ask user)
 - Entity/company name abbreviation expansions (ask user for any aliases)
+- **Pivoted column format expected?** — if the data may arrive with year/quarter-pivoted columns (e.g. `impact_hl_2024`, `impact_hl_2025Q1` from `_apply_period_pivot`), add a section:
+  ```
+  ### Pivoted column format
+  When the result contains columns named `<metric>_<year>` or `<metric>_<year><quarter>`
+  (e.g. `impact_hl_2024`, `impact_hl_2025Q1`), treat `<metric>_<year>` as the value of
+  `<metric>` for that year. Compute and report the change between pivoted period columns.
+  ```
 
 Apply all **12 universal base rules** automatically (do not ask; apply verbatim):
 1. Analyze data for trends across cuts; identify key or notable shifts
@@ -149,7 +160,9 @@ Output: General Instructions → numbered Summary rules → numbered Conclusion 
 
 Ask:
 - Domain equivalences — synonym groups to treat as identical
-- System auto-behaviors that must never be penalized (enumerate ALL pipeline defaults: auto prior-period, auto delta, auto time default, all-rows default when top-k not specified, etc.). **Also include**: metrics returning `NULL` for segments where the denominator/weight is zero (e.g. ROI returning NULL when a segment has no media spend in that period) — this is correct SP behavior, not missing data, and must not be penalized.
+- System auto-behaviors that must never be penalized (enumerate ALL pipeline defaults: auto prior-period, auto delta, auto time default, all-rows default when top-k not specified, etc.). **Also include**:
+  - Metrics returning `NULL` for segments where the denominator/weight is zero (e.g. ROI returning NULL when a segment has no media spend in that period) — this is correct SP behavior, not missing data, and must not be penalized
+  - **Wide pivoted column format** when multi-year or multi-quarter queries are run — results arrive as `metric_2024`, `metric_2025` columns rather than long-format rows; this is expected `post_processing` behavior, not a missing-column error
 - Hard failure conditions — patterns that must always be flagged
 - FSL grading examples (default: `*Empty*`)
 

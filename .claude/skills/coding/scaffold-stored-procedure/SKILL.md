@@ -87,6 +87,14 @@ For **mixed-type** signals, ask:
 - Which value(s) of that column map to additive behavior (e.g. `'media'` = spend → `SUM`)?
 - What should all other values do (`AVG` is the safe default for rates and binary flags)?
 
+> ⚠️ **GROUP BY gotcha for mixed-type metrics**: The CASE WHEN condition references a dim column (e.g. `s.subcategory`). Databricks/Spark SQL strict mode requires every non-aggregated column referenced **anywhere in SELECT** — including inside CASE WHEN conditions — to appear in GROUP BY. Always unconditionally append the type-column to GROUP BY even when the user did not request it as a breakdown dimension. Example fix:
+> ```python
+> group_cols = [c.split(' AS ')[0] for c in sel]
+> if "s.subcategory" not in group_cols:
+>     group_cols.append("s.subcategory")
+> q += f"GROUP BY {', '.join(group_cols)}"
+> ```
+
 **Guard weight-table JOINs** with a `need_weight = "<metric>" in requested_metrics` flag — only emit the JOIN when the weighted metric is actually requested, to keep the query lean when the user asks for a subset of metrics.
 
 ### Step 9 — Runtime optimizations
@@ -162,12 +170,12 @@ def _sanitize_input(self, value: str) -> str:
         if char in value_lower:
             raise ValueError(f"Invalid input: contains dangerous sequence '{char}'")
     import re
-    if not re.match(r"^[a-zA-Z0-9\s_\-\.]+$", value):
+    if not re.match(r"^[a-zA-Z0-9\s_\-\.\/\&]+$", value):
         raise ValueError("Invalid input: contains invalid characters")
     return value.strip()
 ```
 
-Widen the regex if filter values may legally contain `&`, `/`, parentheses, etc.
+The canonical regex allows `&` and `/` — required for common category names like `"Sales & Marketing Investments"`. Widen further if filter values may legally contain parentheses, `+`, etc.
 
 ### Helper 3.2 — `_escape_sql_string`
 

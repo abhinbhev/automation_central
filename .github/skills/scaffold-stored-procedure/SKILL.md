@@ -38,7 +38,7 @@ One question: *"Quarterly publish cadence with 15th-of-next-quarter cutoff — k
 
 ### Step 6 — Helper methods
 For helpers 3.1–3.4, present a one-line assumption and ask canonical / tailored / omit (default: canonical):
-- `_sanitize_input` — blocks SQL-injection; regex `[a-zA-Z0-9\s_\-\.]`; ask if filter values may contain `&`, `/`, etc.
+- `_sanitize_input` — blocks SQL-injection; regex `[a-zA-Z0-9\s_\-\.\/\&]` (includes `&` and `/` for category names like `"Sales & Marketing Investments"`); ask if filter values may contain other special chars
 - `_escape_sql_string` — single-quote escaping + NULL handling; confirm single-quote dialect
 - `_validate_year` — int-range guard 1900–2100; omit if no year column
 - `_parse_filter_param` — splits on `|||#$#|||` or comma; ask if upstream uses a different delimiter
@@ -74,6 +74,14 @@ For **pre-computed ratios**, ask:
 
 For **mixed-type** signals, ask:
 - Which dim column distinguishes the types? Which values → additive, which → rate?
+
+> ⚠️ **GROUP BY gotcha**: The CASE WHEN condition references a dim column (e.g. `s.subcategory`). Databricks/Spark SQL strict mode requires every non-aggregated column referenced **anywhere in SELECT** — including inside CASE WHEN conditions — to appear in GROUP BY. Always unconditionally append the type-column to GROUP BY even when the user did not request it as a breakdown dimension. Example:
+> ```python
+> group_cols = [c.split(' AS ')[0] for c in sel]
+> if "s.subcategory" not in group_cols:
+>     group_cols.append("s.subcategory")
+> q += f"GROUP BY {', '.join(group_cols)}"
+> ```
 
 **Guard weight-table JOINs** with a flag (e.g. `need_weight = "metric_name" in requested_metrics`) — only emit the JOIN when the weighted metric is requested.
 
