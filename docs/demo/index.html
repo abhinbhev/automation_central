@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>automation_central — AI Automation Hub</title>
+<style>
+:root {
+  --bg:         #0c0e14;
+  --bg-card:    #13161f;
+  --bg-term:    #0d1117;
+  --bg-glass:   rgba(255,255,255,0.04);
+  --accent:     #f0a500;
+  --accent-dim: rgba(240,165,0,0.12);
+  --green:      #22c55e;
+  --red:        #f87171;
+  --text:       #e2e8f0;
+  --text-dim:   #64748b;
+  --text-mid:   #94a3b8;
+  --border:     rgba(255,255,255,0.07);
+  --term-green: #4ade80;
+  --term-yellow:#fbbf24;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem; height: 56px;
+  background: rgba(12,14,20,0.88); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-family: 'Courier New', monospace; font-size: 0.95rem; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; }
+.nav-logo span { color: var(--text-dim); font-weight: 400; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { color: var(--text-mid); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.cta { color: var(--accent); font-weight: 600; }
+
+/* ── HERO ── */
+#hero {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 6rem 2rem 4rem;
+  position: relative; overflow: hidden;
+}
+.hero-glow {
+  position: absolute; width: 700px; height: 700px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(240,165,0,0.07) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--accent-dim); border: 1px solid rgba(240,165,0,0.25);
+  border-radius: 999px; padding: 0.35rem 1rem; font-size: 0.8rem;
+  color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase;
+  font-weight: 600; margin-bottom: 1.75rem;
+}
+.hero-badge::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.4; transform:scale(0.8); }
+}
+h1 {
+  font-size: clamp(2.8rem, 7vw, 5rem); font-weight: 800;
+  letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1.25rem;
+}
+h1 .mono { font-family: 'Courier New', monospace; color: var(--accent); }
+.hero-sub { font-size: clamp(1rem, 2vw, 1.25rem); color: var(--text-mid); max-width: 540px; margin-bottom: 1.5rem; }
+.hero-frameworks { display: flex; align-items: center; gap: 0.75rem; justify-content: center; margin-bottom: 3rem; flex-wrap: wrap; }
+.fw-badge { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-glass); border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.9rem; font-size: 0.85rem; font-weight: 500; }
+.fw-badge .dot { width: 8px; height: 8px; border-radius: 50%; }
+.fw-claude .dot { background: #f97316; }
+.fw-copilot .dot { background: #60a5fa; }
+.hero-divider { color: var(--text-dim); font-size: 1.25rem; }
+
+/* ── STATS ── */
+.stats-row { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; }
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.5rem 2rem; min-width: 140px; text-align: center;
+}
+.stat-card:first-child { border-radius: 14px 4px 4px 14px; }
+.stat-card:last-child  { border-radius: 4px 14px 14px 4px; }
+.stat-number { font-size: 2.5rem; font-weight: 800; color: var(--accent); font-family: 'Courier New', monospace; line-height: 1; margin-bottom: 0.25rem; }
+.stat-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* ── SECTIONS ── */
+section { padding: 5rem 2rem; }
+.section-inner { max-width: 1100px; margin: 0 auto; }
+.section-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 0.75rem; }
+.section-title { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 1rem; }
+.section-body { color: var(--text-mid); font-size: 1.05rem; max-width: 600px; margin-bottom: 3rem; }
+
+/* ── PROBLEM ── */
+.problem-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border-radius: 16px; overflow: hidden; }
+@media (max-width: 750px) { .problem-cards { grid-template-columns: 1fr; } }
+.problem-card {
+  background: var(--bg-card); padding: 2rem; display: flex; flex-direction: column; gap: 1rem;
+  opacity: 0; transform: translateY(20px); transition: opacity 0.5s, transform 0.5s;
+}
+.problem-card.visible { opacity: 1; transform: none; }
+.problem-card:nth-child(2) { transition-delay: 0.07s; }
+.problem-card:nth-child(3) { transition-delay: 0.14s; }
+.problem-card:nth-child(4) { transition-delay: 0.21s; }
+.problem-card:nth-child(5) { transition-delay: 0.28s; }
+.problem-card:nth-child(6) { transition-delay: 0.35s; }
+.problem-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); }
+.problem-card h3 { font-size: 1.05rem; font-weight: 700; }
+.problem-card p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.55; }
+.problem-card .time-cost { font-size: 0.8rem; color: var(--red); font-weight: 600; font-family: 'Courier New', monospace; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.15); border-radius: 6px; padding: 0.3rem 0.6rem; display: inline-block; margin-top: auto; }
+
+/* ── SOLUTION ── */
+#solution { background: linear-gradient(180deg, var(--bg) 0%, rgba(240,165,0,0.03) 100%); }
+.solution-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+@media (max-width: 700px) { .solution-grid { grid-template-columns: 1fr; } }
+.solution-pitch { font-size: 1.05rem; color: var(--text-mid); line-height: 1.75; margin-bottom: 2rem; }
+.integration-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chip { display: flex; align-items: center; gap: 0.4rem; background: var(--bg-glass); border: 1px solid var(--border); border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.82rem; color: var(--text-mid); font-weight: 500; }
+.chip-icon { font-size: 0.95rem; }
+.solution-visual { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; font-family: 'Courier New', monospace; font-size: 0.82rem; }
+.solution-visual-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 1.25rem; font-family: sans-serif; }
+.skill-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.skill-row {
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem;
+  border-radius: 8px; background: var(--bg-glass); border: 1px solid var(--border);
+  opacity: 0; transform: translateX(12px); transition: opacity 0.4s, transform 0.4s;
+}
+.skill-row.visible { opacity: 1; transform: none; }
+.skill-cmd { color: var(--accent); font-weight: 700; min-width: 150px; }
+.skill-desc { color: var(--text-dim); font-size: 0.78rem; font-family: sans-serif; }
+.skill-domain { margin-left: auto; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.15rem 0.4rem; border-radius: 4px; background: var(--accent-dim); color: var(--accent); font-family: sans-serif; white-space: nowrap; }
+
+/* ── DEMO CTA ── */
+#demo-cta { background: var(--bg); }
+.demo-cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+@media (max-width: 700px) { .demo-cta-grid { grid-template-columns: 1fr; } }
+.demo-cta-body { font-size: 1.05rem; color: var(--text-mid); line-height: 1.75; margin-bottom: 2rem; }
+.demo-cta-link {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: var(--accent); color: #000; font-weight: 700; font-size: 0.95rem;
+  padding: 0.75rem 1.5rem; border-radius: 10px; text-decoration: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.demo-cta-link:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.demo-preview {
+  background: var(--bg-term); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; overflow: hidden; font-family: 'Courier New', monospace; font-size: 0.82rem;
+}
+.demo-preview-bar {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.6rem 1rem; background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.dp-dot { width: 11px; height: 11px; border-radius: 50%; }
+.dp-red    { background: #ef4444; }
+.dp-yellow { background: #f59e0b; }
+.dp-green  { background: #22c55e; }
+.dp-label { margin-left: 0.5rem; font-family: sans-serif; font-size: 0.72rem; color: var(--text-dim); }
+.demo-preview-body { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.dp-cmd  { color: var(--text); }
+.dp-cmd::before { content: '$ '; color: var(--term-green); }
+.dp-out  { color: var(--term-green); padding-left: 1.1rem; font-size: 0.78rem; }
+.dp-sep  { border: none; border-top: 1px solid var(--border); margin: 0.2rem 0; }
+
+/* ── IMPACT ── */
+#impact { background: var(--bg); }
+
+.impact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+@media (max-width: 750px) { .impact-grid { grid-template-columns: 1fr; } }
+
+.impact-story {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem;
+}
+
+.impact-story-label {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--text-dim); margin-bottom: 0.25rem;
+}
+
+.impact-story-headline {
+  font-size: 1rem; font-weight: 700; color: var(--text); line-height: 1.4;
+}
+
+.impact-bars { display: flex; flex-direction: column; gap: 0.9rem; }
+
+.impact-bar-row { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.impact-bar-label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.8rem; color: var(--text-mid);
+}
+
+.impact-bar-label span { font-family: 'Courier New', monospace; font-weight: 700; }
+.impact-bar-label span.bad  { color: var(--red); }
+.impact-bar-label span.good { color: var(--term-green); }
+
+.impact-bar-track {
+  height: 8px; background: rgba(255,255,255,0.05); border-radius: 999px; overflow: hidden;
+}
+
+.impact-bar-fill {
+  height: 100%; border-radius: 999px;
+  width: 0; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.impact-bar-fill.bad  { background: linear-gradient(90deg, #ef444488, #f87171); }
+.impact-bar-fill.good { background: linear-gradient(90deg, #22c55e, #4ade80); }
+.impact-bar-fill.animated { width: var(--target-width); }
+
+.impact-divider {
+  display: flex; align-items: center; gap: 1rem; color: var(--text-dim); font-size: 0.8rem;
+}
+.impact-divider::before, .impact-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+.impact-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg-glass); border: 1px solid var(--border); border-radius: 10px;
+  padding: 0.75rem 1rem;
+}
+.impact-total-label { font-size: 0.82rem; color: var(--text-dim); }
+.impact-total-bad  { font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: 800; color: var(--red); }
+.impact-total-good { font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: 800; color: var(--term-green); }
+
+.impact-callout {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem;
+}
+
+.impact-callout-quote {
+  font-size: 1.15rem; font-style: italic; color: var(--text); line-height: 1.65;
+  border-left: 3px solid var(--accent); padding-left: 1.25rem;
+}
+
+.impact-callout-source {
+  font-size: 0.8rem; color: var(--text-dim);
+}
+
+.impact-callout-source strong { color: var(--text-mid); }
+
+.impact-breakdown { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.ib-row {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.65rem 1rem; background: var(--bg-glass);
+  border: 1px solid var(--border); border-radius: 8px;
+}
+.ib-check { color: var(--term-green); font-size: 0.85rem; flex-shrink: 0; }
+.ib-task  { font-size: 0.875rem; font-weight: 600; color: var(--text); flex: 1; }
+.ib-before { font-family: 'Courier New', monospace; font-size: 0.75rem; color: var(--red); text-decoration: line-through; opacity: 0.7; }
+.ib-arrow  { color: var(--text-dim); font-size: 0.8rem; }
+.ib-after  { font-family: 'Courier New', monospace; font-size: 0.75rem; color: var(--term-green); font-weight: 700; }
+
+.impact-total-card {
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(240,165,0,0.06); border: 1px solid rgba(240,165,0,0.2);
+  border-radius: 12px; padding: 1.25rem 1.5rem;
+}
+.itc-label { font-size: 0.875rem; color: var(--text-mid); }
+.itc-value { font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+.itc-sub   { font-size: 0.72rem; color: var(--text-dim); margin-top: 0.1rem; }
+
+/* ── ONBOARDING ── */
+#onboarding { background: linear-gradient(180deg, var(--bg) 0%, rgba(240,165,0,0.025) 100%); }
+.onboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 20px; overflow: hidden; }
+@media (max-width: 750px) { .onboard-grid { grid-template-columns: 1fr; } }
+.onboard-card { background: var(--bg-card); padding: 2.25rem; }
+.onboard-card-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 2rem; }
+.onboard-card-icon { font-size: 2rem; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+.onboard-card-title { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+.onboard-card-sub { font-size: 0.875rem; color: var(--text-dim); line-height: 1.5; }
+
+.onboard-steps { display: flex; flex-direction: column; gap: 1rem; }
+.onboard-step { display: flex; align-items: flex-start; gap: 1rem; }
+.onboard-step-num {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #000;
+  font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+.onboard-step-title { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 0.2rem; }
+.onboard-step-code { font-family: 'Courier New', monospace; font-size: 0.78rem; color: var(--accent); background: var(--accent-dim); border-radius: 5px; padding: 0.2rem 0.5rem; display: inline-block; }
+
+.sm-list { display: flex; flex-direction: column; gap: 1.25rem; }
+.sm-item { display: flex; align-items: flex-start; gap: 1rem; }
+.sm-check {
+  width: 22px; height: 22px; border-radius: 50%; background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.3); color: var(--term-green); font-size: 0.7rem;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 3px; font-weight: 700;
+}
+.sm-title { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 0.3rem; }
+.sm-body { font-size: 0.82rem; color: var(--text-dim); line-height: 1.55; }
+.sm-code { font-family: 'Courier New', monospace; color: var(--accent); background: var(--accent-dim); border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.78rem; }
+
+/* ── DOMAINS ── */
+#domains { background: var(--bg); }
+.domains-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border-radius: 16px; overflow: hidden; }
+@media (max-width: 700px) { .domains-grid { grid-template-columns: 1fr; } }
+.domain-card {
+  background: var(--bg-card); padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;
+  opacity: 0; transform: scale(0.96); transition: opacity 0.4s, transform 0.4s; cursor: default;
+}
+.domain-card:hover { background: rgba(240,165,0,0.04); }
+.domain-card.visible { opacity: 1; transform: scale(1); }
+.domain-icon { font-size: 1.75rem; line-height: 1; }
+.domain-name { font-weight: 700; font-size: 0.95rem; }
+.domain-count { font-size: 0.8rem; color: var(--text-dim); }
+.domain-count strong { color: var(--accent); font-family: 'Courier New', monospace; }
+
+/* ── HOW IT WORKS ── */
+#how { background: var(--bg); }
+.steps { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 0; margin-top: 3rem; }
+@media (max-width: 700px) {
+  .steps { grid-template-columns: 1fr; gap: 1px; background: var(--border); border-radius: 16px; overflow: hidden; }
+  .step-arrow { display: none; }
+}
+.step {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 2rem 1.75rem; text-align: center;
+  opacity: 0; transform: translateY(16px); transition: opacity 0.5s, transform 0.5s;
+}
+.step.visible { opacity: 1; transform: none; }
+.step:nth-child(3) { transition-delay: 0.15s; }
+.step:nth-child(5) { transition-delay: 0.3s; }
+.step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #000; font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+.step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+.step p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.55; }
+.step .step-example { margin-top: 1rem; font-family: 'Courier New', monospace; font-size: 0.8rem; color: var(--accent); background: var(--accent-dim); border-radius: 6px; padding: 0.4rem 0.75rem; display: inline-block; }
+.step-arrow { font-size: 1.5rem; color: var(--text-dim); text-align: center; padding: 0 0.5rem; }
+
+/* ── UTILITIES ── */
+.fade-in { opacity: 0; transform: translateY(16px); transition: opacity 0.6s, transform 0.6s; }
+.fade-in.visible { opacity: 1; transform: none; }
+
+/* ── FOOTER ── */
+footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.82rem; }
+footer strong { color: var(--accent); font-family: 'Courier New', monospace; }
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <div class="nav-logo">automation_central <span>/ ABI</span></div>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#solution">Solution</a></li>
+    <li><a href="#impact">Impact</a></li>
+    <li><a href="#onboarding">Onboarding</a></li>
+    <li><a href="#domains">Catalog</a></li>
+    <li><a href="#how">Architecture</a></li>
+    <li><a href="demos.html" class="cta">Live Demo →</a></li>
+    <li><a href="roadmap.html" class="cta">Roadmap →</a></li>
+  </ul>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge">AI Automation Hub</div>
+  <h1>Stop doing it<br>the hard way.<br><span class="mono">automation_central</span></h1>
+  <p class="hero-sub">One repo. 38 skills. 10 AI agents. Everything your engineering team does every day — automated.</p>
+  <div class="hero-frameworks">
+    <div class="fw-badge fw-claude"><div class="dot"></div> Claude Code</div>
+    <div class="hero-divider">+</div>
+    <div class="fw-badge fw-copilot"><div class="dot"></div> GitHub Copilot</div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-number" data-target="38">0</div><div class="stat-label">Skills</div></div>
+    <div class="stat-card"><div class="stat-number" data-target="10">0</div><div class="stat-label">AI Agents</div></div>
+    <div class="stat-card"><div class="stat-number" data-target="9">0</div><div class="stat-label">Domains</div></div>
+    <div class="stat-card"><div class="stat-number" data-target="15">0</div><div class="stat-label">Scripts</div></div>
+  </div>
+</section>
+
+<!-- ══ PROBLEM ══ -->
+<section id="problem">
+  <div class="section-inner">
+    <div class="section-label">The Problem</div>
+    <h2 class="section-title">Repetitive things our team does manually.<br>Every sprint.</h2>
+    <p class="section-body">Pipeline boilerplate, use case authoring, form-filling, PR write-ups — the same recurring overhead, every time. That's time not spent building.</p>
+    <div class="problem-cards">
+      <div class="problem-card">
+        <div class="problem-icon">📊</div>
+        <h3>Data EDA &amp; ETL pipelines</h3>
+        <p>Every new data use case means writing ingestion scripts, schema DDL, and pipeline docs from scratch — before any real analysis can start.</p>
+        <span class="time-cost">~1 month of iterative effort</span>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🗂️</div>
+        <h3>Use case onboarding: ATs &amp; SPs</h3>
+        <p>Authoring Analysis Template prompts and stored procedures for each new use case is manual, error-prone, and inconsistent between team members.</p>
+        <span class="time-cost">~3 months per use case</span>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🔧</div>
+        <h3>No standardized automations or skills for Copilot</h3>
+        <p>Scaffolding a SKILL.md, wiring it to the right agent, ensuring Claude and Copilot parity, updating the catalog — all manual copy-paste or repetitive work.</p>
+        <span class="time-cost">~2 hours per task</span>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">📌</div>
+        <h3>ADO work items from feature specs</h3>
+        <p>Translating a feature description into epics, stories, and tasks in Azure DevOps means clicking through the same form fields over and over.</p>
+        <span class="time-cost">~1-2 hours per feature</span>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">⚙️</div>
+        <h3>GitHub Actions &amp; PR descriptions</h3>
+        <p>Writing CI/CD workflow YAML and crafting a clear PR description from a diff is repetitive, inconsistent, and takes time away from the actual change.</p>
+        <span class="time-cost">~1 hr per PR / pipeline</span>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">📧</div>
+        <h3>Calendar invites &amp; stakeholder emails</h3>
+        <p>Drafting status updates, scheduling recurring syncs, and coordinating via Teams and Outlook is scattered across tabs and done from memory every time.</p>
+        <span class="time-cost">~15 min per comms task</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SOLUTION ══ -->
+<section id="solution">
+  <div class="section-inner">
+    <div class="section-label">The Solution</div>
+    <div class="solution-grid">
+      <div>
+        <h2 class="section-title">One command.<br>Done in seconds.</h2>
+        <p class="solution-pitch"><strong style="color:var(--text)">automation_central</strong> is a shared, version-controlled AI automation library that lives alongside your code. Type a slash command in VS Code — Claude or Copilot picks up the right agent, runs the right script, and delivers structured output directly to your workflow.</p>
+        <p class="solution-pitch" style="margin-top:-1rem;">Every tool your team already uses — Azure DevOps, GitHub, Teams, Outlook — is wired in. No copy-pasting between tabs. No prompt engineering on the fly.</p>
+        <div class="integration-chips">
+          <div class="chip"><span class="chip-icon">🔵</span> Azure DevOps</div>
+          <div class="chip"><span class="chip-icon">⚫</span> GitHub</div>
+          <div class="chip"><span class="chip-icon">🟣</span> Microsoft Teams</div>
+          <div class="chip"><span class="chip-icon">🔷</span> Azure</div>
+          <div class="chip"><span class="chip-icon">📧</span> Outlook</div>
+        </div>
+      </div>
+      <div class="solution-visual">
+        <div class="solution-visual-title">A few of the 38 available skills</div>
+        <div class="skill-list">
+          <div class="skill-row"><span class="skill-cmd">/meeting-minutes</span><span class="skill-desc">Notes → structured minutes</span><span class="skill-domain">Comms</span></div>
+          <div class="skill-row"><span class="skill-cmd">/pr-description</span><span class="skill-desc">Git diff → PR body</span><span class="skill-domain">DevOps</span></div>
+          <div class="skill-row"><span class="skill-cmd">/create-work-items</span><span class="skill-desc">Freetext → ADO Epic/Stories</span><span class="skill-domain">ADO</span></div>
+          <div class="skill-row"><span class="skill-cmd">/email-draft</span><span class="skill-desc">Context → stakeholder email</span><span class="skill-domain">Comms</span></div>
+          <div class="skill-row"><span class="skill-cmd">/code-review</span><span class="skill-desc">Diff → checklist review</span><span class="skill-domain">Coding</span></div>
+          <div class="skill-row"><span class="skill-cmd">/ppt-from-outline</span><span class="skill-desc">Bullets → slide deck</span><span class="skill-domain">Office</span></div>
+          <div class="skill-row"><span class="skill-cmd">/release-notes</span><span class="skill-desc">Sprint → release notes</span><span class="skill-domain">ADO</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ DEMO CTA ══ -->
+<section id="demo-cta">
+  <div class="section-inner">
+    <div class="section-label">See It Live</div>
+    <div class="demo-cta-grid">
+      <div>
+        <h2 class="section-title fade-in">6 real use cases.<br>One repo.</h2>
+        <p class="demo-cta-body fade-in">ETL pipelines, use case onboarding, new skills, ADO backlog, CI/CD, Outlook — rough input in, production output out. Each one is a single slash command.</p>
+        <a href="demos.html" class="demo-cta-link fade-in">See all 6 demos →</a>
+      </div>
+      <div class="demo-preview fade-in">
+        <div class="demo-preview-bar">
+          <div class="dp-dot dp-red"></div>
+          <div class="dp-dot dp-yellow"></div>
+          <div class="dp-dot dp-green"></div>
+          <div class="dp-label">Claude Code — VS Code Terminal</div>
+        </div>
+        <div class="demo-preview-body">
+          <div class="dp-cmd">/scaffold-pipeline</div>
+          <div class="dp-out">✓ etl/load_sales_weekly.py · schema/fact_brand_weekly.sql</div>
+          <hr class="dp-sep">
+          <div class="dp-cmd">/scaffold-at-prompts</div>
+          <div class="dp-out">✓ AT prompts + stored procedure — Colombia Brand Health</div>
+          <hr class="dp-sep">
+          <div class="dp-cmd">/add-skill</div>
+          <div class="dp-out">✓ /summarize-slack registered · catalog: 38 → 39 skills</div>
+          <hr class="dp-sep">
+          <div class="dp-cmd">/create-work-items</div>
+          <div class="dp-out">✓ Epic #4821 · 3 Stories · 7 Tasks created in ADO</div>
+          <hr class="dp-sep">
+          <div class="dp-cmd">/gh-actions-workflow</div>
+          <div class="dp-out">✓ .github/workflows/ci.yml · PR description ready</div>
+          <hr class="dp-sep">
+          <div class="dp-cmd">/email-draft</div>
+          <div class="dp-out">✓ Calendar invite created · status email drafted</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ IMPACT ══ -->
+<section id="impact">
+  <div class="section-inner">
+    <div class="section-label">Real Impact Example</div>
+    <h2 class="section-title fade-in">What used to take 4 months.<br>Shipped in 5 days.</h2>
+    <p class="section-body fade-in">The Watchtower project — a full Marketing Mix Model analytics platform — was delivered end-to-end in a single sprint. Same quality. A fraction of the time.</p>
+
+    <div class="impact-grid">
+
+      <!-- Left: bar chart comparison -->
+      <div class="impact-story">
+        <div>
+          <div class="impact-story-label">Before automation_central</div>
+          <div class="impact-story-headline">Each deliverable was a separate month-long effort.</div>
+        </div>
+        <div class="impact-bars">
+          <div class="impact-bar-row">
+            <div class="impact-bar-label"><span>ETL Pipelines</span><span class="bad">~1 month</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill bad" style="--target-width:100%"></div></div>
+          </div>
+          <div class="impact-bar-row">
+            <div class="impact-bar-label"><span>Stored Procedures</span><span class="bad">~1 month</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill bad" style="--target-width:100%"></div></div>
+          </div>
+          <div class="impact-bar-row">
+            <div class="impact-bar-label"><span>Analysis Templates</span><span class="bad">~1 month</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill bad" style="--target-width:100%"></div></div>
+          </div>
+          <div class="impact-bar-row">
+            <div class="impact-bar-label"><span>AI Prompts</span><span class="bad">~1 month</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill bad" style="--target-width:100%"></div></div>
+          </div>
+        </div>
+        <div class="impact-divider">total</div>
+        <div class="impact-total-row">
+          <span class="impact-total-label">Sequential delivery estimate</span>
+          <span class="impact-total-bad">~4 months</span>
+        </div>
+      </div>
+
+      <!-- Right: breakdown + callout -->
+      <div class="impact-callout">
+        <div>
+          <div class="impact-story-label">With automation_central</div>
+          <div class="impact-story-headline">All four delivered in a single sprint.</div>
+        </div>
+        <div class="impact-breakdown">
+          <div class="ib-row">
+            <span class="ib-check">✓</span>
+            <span class="ib-task">ETL Pipelines</span>
+            <span class="ib-before">~1 month</span>
+            <span class="ib-arrow">→</span>
+            <span class="ib-after">1–2 days</span>
+          </div>
+          <div class="ib-row">
+            <span class="ib-check">✓</span>
+            <span class="ib-task">Stored Procedures</span>
+            <span class="ib-before">~1 month</span>
+            <span class="ib-arrow">→</span>
+            <span class="ib-after">1 day</span>
+          </div>
+          <div class="ib-row">
+            <span class="ib-check">✓</span>
+            <span class="ib-task">Analysis Templates</span>
+            <span class="ib-before">~1 month</span>
+            <span class="ib-arrow">→</span>
+            <span class="ib-after">1–2 days</span>
+          </div>
+          <div class="ib-row">
+            <span class="ib-check">✓</span>
+            <span class="ib-task">AI Prompts</span>
+            <span class="ib-before">~1 month</span>
+            <span class="ib-arrow">→</span>
+            <span class="ib-after">&lt;1 day</span>
+          </div>
+        </div>
+        <div class="impact-total-card">
+          <div>
+            <div class="itc-label">Total delivery time</div>
+            <div class="itc-sub">Watchtower — MMM Analytics Platform</div>
+          </div>
+          <div style="text-align:right">
+            <div class="itc-value">5 days</div>
+            <div class="itc-sub" style="color:var(--term-green)">vs ~4 months without</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ ONBOARDING ══ -->
+<section id="onboarding">
+  <div class="section-inner">
+    <div class="section-label">Team Adoption</div>
+    <h2 class="section-title fade-in">Built to grow with your team.</h2>
+    <p class="section-body fade-in">Quick to adopt for any engineer. Zero documentation overhead — the repo maintains itself.</p>
+    <div class="onboard-grid">
+
+      <!-- Left: Quick setup -->
+      <div class="onboard-card">
+        <div class="onboard-card-header">
+          <div class="onboard-card-icon">⚡</div>
+          <div>
+            <div class="onboard-card-title">Up and running in minutes</div>
+            <div class="onboard-card-sub">No special infrastructure. Runs where your team already codes — VS Code.</div>
+          </div>
+        </div>
+        <div class="onboard-steps">
+          <div class="onboard-step">
+            <div class="onboard-step-num">1</div>
+            <div>
+              <div class="onboard-step-title">Clone the repo</div>
+              <div class="onboard-step-code">git clone automation_central</div>
+            </div>
+          </div>
+          <div class="onboard-step">
+            <div class="onboard-step-num">2</div>
+            <div>
+              <div class="onboard-step-title">Install the Python environment</div>
+              <div class="onboard-step-code">conda env create -f conda-env.yml</div>
+            </div>
+          </div>
+          <div class="onboard-step">
+            <div class="onboard-step-num">3</div>
+            <div>
+              <div class="onboard-step-title">Wire up integrations</div>
+              <div class="onboard-step-code">mcp install azure-devops github</div>
+            </div>
+          </div>
+          <div class="onboard-step">
+            <div class="onboard-step-num">4</div>
+            <div>
+              <div class="onboard-step-title">Start using skills immediately</div>
+              <div class="onboard-step-code">/meeting-minutes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Self-maintaining -->
+      <div class="onboard-card">
+        <div class="onboard-card-header">
+          <div class="onboard-card-icon">🔄</div>
+          <div>
+            <div class="onboard-card-title">The catalog maintains itself</div>
+            <div class="onboard-card-sub">Any engineer can contribute a new skill in ~15 minutes. Standards are enforced automatically.</div>
+          </div>
+        </div>
+        <div class="sm-list">
+          <div class="sm-item">
+            <div class="sm-check">✓</div>
+            <div>
+              <div class="sm-title"><span class="sm-code">/add-skill</span> scaffolds everything</div>
+              <div class="sm-body">One command generates the skill definition, registers it in both Claude and Copilot catalogs, and links it to the right specialist agent. No manual wiring.</div>
+            </div>
+          </div>
+          <div class="sm-item">
+            <div class="sm-check">✓</div>
+            <div>
+              <div class="sm-title">Validators enforce quality before merge</div>
+              <div class="sm-body"><span class="sm-code">validate_skill.py</span> and <span class="sm-code">validate_agent.py</span> check naming conventions, required fields, and cross-references — blocking non-compliant entries before they hit <span class="sm-code">main</span>.</div>
+            </div>
+          </div>
+          <div class="sm-item">
+            <div class="sm-check">✓</div>
+            <div>
+              <div class="sm-title">Catalog auto-regenerates on every change</div>
+              <div class="sm-body"><span class="sm-code">generate_catalog.py</span> rebuilds the full skill and agent directory automatically. No docs to maintain by hand — it's always up to date.</div>
+            </div>
+          </div>
+          <div class="sm-item">
+            <div class="sm-check">✓</div>
+            <div>
+              <div class="sm-title">One definition, two tools</div>
+              <div class="sm-body">Skills added to <span class="sm-code">automation_central</span> are instantly available to both Claude Code and GitHub Copilot users. The whole team benefits from every contribution.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ DOMAINS ══ -->
+<section id="domains">
+  <div class="section-inner">
+    <div class="section-label">Skill Catalog</div>
+    <h2 class="section-title fade-in">38 skills across 9 domains.</h2>
+    <p class="section-body fade-in">Every repeatable engineering task has a command. The catalog grows as the team adds skills.</p>
+    <div class="domains-grid">
+      <div class="domain-card"><div class="domain-icon">📌</div><div class="domain-name">ADO</div><div class="domain-count"><strong>5</strong> skills</div></div>
+      <div class="domain-card"><div class="domain-icon">📄</div><div class="domain-name">Office</div><div class="domain-count"><strong>3</strong> skills</div></div>
+      <div class="domain-card"><div class="domain-icon">💬</div><div class="domain-name">Communication</div><div class="domain-count"><strong>3</strong> skills</div></div>
+      <div class="domain-card"><div class="domain-icon">⚙️</div><div class="domain-name">DevOps / CI-CD</div><div class="domain-count"><strong>4</strong> skills</div></div>
+      <div class="domain-card"><div class="domain-icon">💻</div><div class="domain-name">Coding / SCM</div><div class="domain-count"><strong>6</strong> skills</div></div>
+      <div class="domain-card"><div class="domain-icon">📊</div><div class="domain-name">Data / ML</div><div class="domain-count"><strong>3</strong> skills</div></div>
+      <div class="domain-card"><div class="domain-icon">🏗️</div><div class="domain-name">Platform / Infra</div><div class="domain-count"><strong>3</strong> skills</div></div>
+      <div class="domain-card"><div class="domain-icon">📚</div><div class="domain-name">Documentation</div><div class="domain-count"><strong>5</strong> skills</div></div>
+      <div class="domain-card"><div class="domain-icon">🔧</div><div class="domain-name">Repo Maintenance</div><div class="domain-count"><strong>6</strong> skills</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOW IT WORKS ══ -->
+<section id="how">
+  <div class="section-inner">
+    <div class="section-label">Architecture</div>
+    <h2 class="section-title fade-in">Built for both Claude and Copilot.</h2>
+    <p class="section-body fade-in">The same 10 agent modes and skill catalog are available in both Claude Code and GitHub Copilot. Your whole team uses the tool they already have open.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Type a skill command</h3>
+        <p>In VS Code's Claude sidebar or Copilot Chat — the same slash commands work in both tools.</p>
+        <div class="step-example">/meeting-minutes</div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Agent + script activate</h3>
+        <p>The skill routes to the right specialist agent, which calls the appropriate Python script with your context.</p>
+        <div class="step-example">doc-writer + word_builder.py</div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Output delivered</h3>
+        <p>Structured text, ADO work items created, a Word doc generated — whatever the task needs, ready to use.</p>
+        <div class="step-example">✓ ADO #4821 created</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ROADMAP CTA ══ -->
+<section style="background:var(--bg); padding: 3rem 2rem 5rem;">
+  <div class="section-inner" style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:1.5rem;">
+    <div class="section-label">What's Next</div>
+    <h2 class="section-title fade-in" style="max-width:520px;">5 phases. 43 features.<br>All tracked in ADO.</h2>
+    <p style="color:var(--text-mid); font-size:1.05rem; max-width:480px;" class="fade-in">From quality gates and developer experience improvements to multi-agent orchestration — here's the full plan.</p>
+    <a href="roadmap.html" class="demo-cta-link fade-in" style="background:var(--bg-card); color:var(--text); border:1px solid var(--border);">View the Roadmap →</a>
+  </div>
+</section>
+
+<footer>
+  <strong>automation_central</strong> &nbsp;·&nbsp; Anheuser-Busch InBev &nbsp;·&nbsp; Internal Use Only
+</footer>
+
+<script>
+function animateCounter(el, target, duration) {
+  let start = null;
+  function step(ts) {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / duration, 1);
+    el.textContent = Math.round(p * target);
+    if (p < 1) requestAnimationFrame(step); else el.textContent = target;
+  }
+  requestAnimationFrame(step);
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const el = entry.target;
+    if (el.classList.contains('stat-number')) animateCounter(el, Number(el.dataset.target), 1200);
+    else if (el.classList.contains('impact-bar-fill')) el.classList.add('animated');
+    else el.classList.add('visible');
+    observer.unobserve(el);
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-in, .step, .problem-card, .domain-card, .skill-row, .stat-number, .impact-bar-fill')
+  .forEach(el => observer.observe(el));
+
+document.querySelectorAll('.domain-card').forEach((c, i) => { c.style.transitionDelay = (i * 0.05) + 's'; });
+document.querySelectorAll('.skill-row').forEach((c, i)   => { c.style.transitionDelay = (i * 0.06) + 's'; });
+</script>
+</body>
+</html>

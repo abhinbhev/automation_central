@@ -42,6 +42,3 @@ templates/**/*.md
 
 
 working_directory/**/
-
-# Sprint docs
-docs/**/
