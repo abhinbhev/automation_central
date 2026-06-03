@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Demo — automation_central</title>
+<style>
+:root {
+  --bg:         #0c0e14;
+  --bg-card:    #13161f;
+  --bg-term:    #0d1117;
+  --bg-input:   #111520;
+  --bg-glass:   rgba(255,255,255,0.04);
+  --accent:     #f0a500;
+  --accent-dim: rgba(240,165,0,0.12);
+  --blue:       #60a5fa;
+  --purple:     #a78bfa;
+  --green:      #22c55e;
+  --teal:       #2dd4bf;
+  --pink:       #f472b6;
+  --text:       #e2e8f0;
+  --text-dim:   #64748b;
+  --text-mid:   #94a3b8;
+  --border:     rgba(255,255,255,0.07);
+  --term-green: #4ade80;
+  --term-yellow:#fbbf24;
+  --term-blue:  #93c5fd;
+  --term-dim:   #475569;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem; height: 56px;
+  background: rgba(12,14,20,0.88); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-back { display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
+.nav-back:hover { color: var(--text); }
+.nav-back svg { width: 16px; height: 16px; }
+.nav-logo { font-family: 'Courier New', monospace; font-size: 0.95rem; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; }
+.nav-logo span { color: var(--text-dim); font-weight: 400; }
+
+/* ── HEADER ── */
+#header { padding: 7rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+.header-glow {
+  position: absolute; width: 500px; height: 300px;
+  background: radial-gradient(ellipse, rgba(240,165,0,0.07) 0%, transparent 70%);
+  top: 0; left: 50%; transform: translateX(-50%); pointer-events: none;
+}
+.header-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 0.75rem; }
+.header-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 1rem; }
+.header-sub { font-size: 1.05rem; color: var(--text-mid); max-width: 560px; margin: 0 auto 2rem; }
+
+/* ── COMMAND GRID ── */
+.cmd-grid {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 0.5rem 1.5rem;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 700px;
+}
+@media (max-width: 600px) { .cmd-grid { grid-template-columns: 1fr 1fr; } }
+
+.cmd-pill {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.45rem 0.9rem;
+  font-size: 0.8rem; color: var(--text-mid); white-space: nowrap;
+}
+.cmd-pill .num { font-size: 0.65rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #000; }
+.cmd-pill strong { color: var(--text); font-family: 'Courier New', monospace; font-size: 0.78rem; }
+
+/* ── DEMO CARDS ── */
+.demos-container { padding: 2rem 2rem 5rem; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 2.5rem; }
+
+.demo-card {
+  border: 1px solid var(--border); border-radius: 20px; overflow: hidden;
+  opacity: 0; transform: translateY(24px); transition: opacity 0.6s, transform 0.6s;
+}
+.demo-card.visible { opacity: 1; transform: none; }
+
+.demo-card-header {
+  display: flex; align-items: center; gap: 1.25rem;
+  padding: 1.25rem 1.75rem; border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+}
+.demo-card-num {
+  font-family: 'Courier New', monospace; font-size: 1.75rem; font-weight: 800; line-height: 1;
+  color: var(--card-accent, var(--accent)); opacity: 0.3; min-width: 2.5rem;
+}
+.demo-card-text { flex: 1; }
+.demo-card-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+.demo-card-desc  { font-size: 0.85rem; color: var(--text-dim); }
+.demo-card-badge {
+  font-family: 'Courier New', monospace; font-size: 0.77rem; font-weight: 700;
+  color: var(--card-accent, var(--accent));
+  background: var(--card-accent-dim, var(--accent-dim));
+  border: 1px solid color-mix(in srgb, var(--card-accent, var(--accent)) 25%, transparent);
+  border-radius: 7px; padding: 0.3rem 0.7rem; white-space: nowrap; flex-shrink: 0;
+}
+
+.demo-card-body {
+  display: grid; grid-template-columns: 1fr 1fr; background: var(--border); gap: 1px;
+}
+@media (max-width: 800px) { .demo-card-body { grid-template-columns: 1fr; } }
+
+/* ── INPUT PANE ── */
+.input-pane { background: var(--bg-input); display: flex; flex-direction: column; }
+.pane-bar {
+  display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1rem;
+  border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);
+}
+.pane-bar-title { font-size: 0.7rem; color: var(--text-dim); font-family: 'Courier New', monospace; flex: 1; }
+.pane-bar-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); background: var(--bg-glass); border: 1px solid var(--border); border-radius: 4px; padding: 0.15rem 0.4rem; }
+.input-content {
+  padding: 1.1rem 1.4rem; font-family: 'Courier New', monospace; font-size: 0.79rem;
+  color: var(--text-mid); line-height: 1.75; flex: 1; white-space: pre-wrap;
+}
+.input-content .ik { color: var(--text); }
+.input-content .iv { color: var(--text-mid); }
+.input-content .ib { display: block; height: 0.5em; }
+
+/* ── TERMINAL PANE ── */
+.terminal-pane { background: var(--bg-term); display: flex; flex-direction: column; }
+.term-bar {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.6rem 1rem; background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.term-dot { width: 11px; height: 11px; border-radius: 50%; }
+.td-r { background: #ef4444; } .td-y { background: #f59e0b; } .td-g { background: #22c55e; }
+.term-title { margin-left: 0.5rem; font-family: sans-serif; font-size: 0.7rem; color: var(--text-dim); flex: 1; text-align: center; }
+.term-replay { font-family: sans-serif; font-size: 0.68rem; cursor: pointer; border: 1px solid var(--border); background: none; color: var(--text-dim); border-radius: 5px; padding: 0.18rem 0.5rem; transition: color 0.2s, border-color 0.2s; }
+.term-replay:hover { color: var(--accent); border-color: rgba(240,165,0,0.3); }
+.term-body {
+  padding: 1.1rem 1.4rem; flex: 1; min-height: 240px;
+  display: flex; flex-direction: column; gap: 0;
+  font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.65;
+  overflow-y: auto;
+}
+.tl { display: block; min-height: 1.3em; white-space: pre-wrap; word-break: break-word; }
+.tl.t-cmd    { color: var(--text); }
+.tl.t-cmd::before { content: '$ '; color: var(--term-green); }
+.tl.t-spin   { color: var(--term-yellow); }
+.tl.t-ok     { color: var(--term-green); }
+.tl.t-h1     { color: var(--text); font-weight: 700; }
+.tl.t-h2     { color: var(--text-mid); font-weight: 600; }
+.tl.t-body   { color: var(--text-mid); }
+.tl.t-accent { color: var(--accent); }
+.tl.t-blue   { color: var(--term-blue); }
+.tl.t-blank  { min-height: 0.55em; }
+.tl.t-prompt { color: var(--text-dim); }
+
+.cursor { display: inline-block; width: 7px; height: 1em; background: var(--text); vertical-align: text-bottom; animation: blink 1s step-end infinite; margin-left: 1px; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-back">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg>
+    Back to overview
+  </a>
+  <div class="nav-logo">automation_central <span>/ Live Demo</span></div>
+</nav>
+
+<div id="header">
+  <div class="header-glow"></div>
+  <div class="header-label">6 Real Use Cases</div>
+  <h1 class="header-title">From rough notes<br>to production output.</h1>
+  <p class="header-sub">No prompt engineering. No copy-pasting. Just describe what you need — in plain English — and the right skill takes it from there.</p>
+  <div class="cmd-grid">
+    <div class="cmd-pill"><span class="num" style="background:var(--accent)">1</span><strong>/scaffold-pipeline</strong></div>
+    <div class="cmd-pill"><span class="num" style="background:var(--blue)">2</span><strong>/scaffold-at-prompts</strong></div>
+    <div class="cmd-pill"><span class="num" style="background:var(--purple)">3</span><strong>/add-skill</strong></div>
+    <div class="cmd-pill"><span class="num" style="background:var(--teal)">4</span><strong>/create-work-items</strong></div>
+    <div class="cmd-pill"><span class="num" style="background:var(--green)">5</span><strong>/gh-actions-workflow</strong></div>
+    <div class="cmd-pill"><span class="num" style="background:var(--pink)">6</span><strong>/email-draft</strong></div>
+  </div>
+</div>
+
+<div class="demos-container" id="demos">
+  <!-- Rendered by JS -->
+</div>
+
+<script>
+// ── DEMO DATA ────────────────────────────────────────────────────────────────
+
+const demoMeta = [
+  {
+    num: '01',
+    title: 'Data EDA & ETL Pipelines',
+    desc: 'Rough description of your data → working pipeline scaffold, star schema DDL, and auto-generated docs.',
+    badge: '/scaffold-pipeline',
+    accentColor: 'var(--accent)',
+    accentDim: 'var(--accent-dim)',
+    inputFile: 'data-brief.txt',
+    inputIcon: '📊',
+    inputLines: [
+      { t:'iv', v:'raw sales data by brand / country / week' },
+      { t:'iv', v:'want to track weekly brand performance' },
+      { t:'b' },
+      { t:'iv', v:'needs to go into a star schema' },
+      { t:'iv', v:'just need a working scaffold to build on' },
+    ],
+    script: [
+      { cls:'t-cmd',  text:'/scaffold-pipeline',                     type:true, speed:50, delay:500 },
+      { cls:'t-blank',text:'', delay:120 },
+      { cls:'t-spin', text:'⠿ Parsing your data description...',     delay:350 },
+      { cls:'t-spin', text:'⠿ Scaffolding pipeline modules...',      delay:750 },
+      { cls:'t-blank',text:'', delay:550 },
+      { cls:'t-ok',   text:'✓ etl/load_sales_weekly.py       — ingest + dedup', delay:90 },
+      { cls:'t-ok',   text:'✓ etl/transform_brand_metrics.py — weekly rollup',  delay:90 },
+      { cls:'t-ok',   text:'✓ schema/fact_brand_weekly.sql   — star schema DDL',delay:90 },
+      { cls:'t-ok',   text:'✓ docs/pipeline_docs.md          — auto-generated', delay:90 },
+      { cls:'t-blank',text:'', delay:80 },
+      { cls:'t-accent',text:'Run: python etl/load_sales_weekly.py',  delay:200 },
+    ],
+  },
+  {
+    num: '02',
+    title: 'Use Case Onboarding: ATs & SPs',
+    desc: 'A few lines describing the use case → Analysis Template prompts and a stored procedure scaffolded and linked.',
+    badge: '/scaffold-at-prompts',
+    accentColor: 'var(--blue)',
+    accentDim: 'var(--blue-dim, rgba(96,165,250,0.12))',
+    inputFile: 'use-case-brief.txt',
+    inputIcon: '🗂️',
+    inputLines: [
+      { t:'iv', v:'brand health tracker for colombia' },
+      { t:'iv', v:'weekly summary report for brand team' },
+      { t:'b' },
+      { t:'iv', v:'kpis: awareness, consideration, preference' },
+      { t:'iv', v:'need AT prompt + a stored proc for the query' },
+    ],
+    script: [
+      { cls:'t-cmd',  text:'/scaffold-at-prompts',                    type:true, speed:50, delay:500 },
+      { cls:'t-blank',text:'', delay:120 },
+      { cls:'t-spin', text:'⠿ Parsing use case brief...',             delay:350 },
+      { cls:'t-spin', text:'⠿ Scaffolding Analysis Templates...',    delay:750 },
+      { cls:'t-spin', text:'⠿ Scaffolding stored procedure...',      delay:700 },
+      { cls:'t-blank',text:'', delay:500 },
+      { cls:'t-ok',   text:'✓ prompts/at_simple_summarizer/brand_health_weekly.md', delay:90 },
+      { cls:'t-ok',   text:'✓ prompts/at_query_enhancer/brand_health_col.md',       delay:90 },
+      { cls:'t-ok',   text:'✓ stored_procedures/sp_brand_health_col.py',            delay:90 },
+      { cls:'t-blank',text:'', delay:80 },
+      { cls:'t-accent',text:'Use case Colombia · Brand Health: scaffolded and linked', delay:200 },
+    ],
+  },
+  {
+    num: '03',
+    title: 'Adding a New Skill to the Repo',
+    desc: 'Describe what the skill should do → SKILL.md scaffolded, validated, and registered in both Claude and Copilot catalogs.',
+    badge: '/add-skill',
+    accentColor: 'var(--purple)',
+    accentDim: 'rgba(167,139,250,0.12)',
+    inputFile: 'skill-brief.txt',
+    inputIcon: '🔧',
+    inputLines: [
+      { t:'iv', v:'need a skill to run the drivers of participation model' },
+      { t:'iv', v:'notebook already exists in working_directory/bg_gt/' },
+      { t:'b' },
+      { t:'iv', v:'should work for any input country, brand, and period' },
+      { t:'iv', v:'call it run-dop-model' },
+    ],
+    script: [
+      { cls:'t-cmd',  text:'/add-skill',                              type:true, speed:50, delay:500 },
+      { cls:'t-blank',text:'', delay:120 },
+      { cls:'t-spin', text:'⠿ Scaffolding skill structure...',        delay:400 },
+      { cls:'t-spin', text:'⠿ Running validate_skill.py...  ✓',      delay:700 },
+      { cls:'t-spin', text:'⠿ Registering in catalog...',            delay:600 },
+      { cls:'t-blank',text:'', delay:450 },
+      { cls:'t-ok',   text:'✓ .claude/skills/run-dop-model/SKILL.md',    delay:90 },
+      { cls:'t-ok',   text:'✓ .github/skills/run-dop-model/SKILL.md',    delay:90 },
+      { cls:'t-ok',   text:'✓ docs/automation-catalog.md — 39 skills (was 38)', delay:90 },
+      { cls:'t-blank',text:'', delay:80 },
+      { cls:'t-accent',text:'/run-dop-model is live — country, brand, period as inputs', delay:200 },
+    ],
+  },
+  {
+    num: '04',
+    title: 'ADO Work Items from a Feature Brief',
+    desc: 'A rough feature description → full Epic, Stories, and Tasks created directly in Azure DevOps.',
+    badge: '/create-work-items',
+    accentColor: 'var(--teal)',
+    accentDim: 'rgba(45,212,191,0.10)',
+    inputFile: 'feature-brief.txt',
+    inputIcon: '📋',
+    inputLines: [
+      { t:'iv', v:'add sso to the analytics dashboard' },
+      { t:'iv', v:'use azure ad, oauth2 flow' },
+      { t:'b' },
+      { t:'iv', v:'3 types of users - admin, viewer, analyst' },
+      { t:'iv', v:'need to log everything (app insights)' },
+      { t:'iv', v:'hook into the existing user table somehow' },
+      { t:'b' },
+      { t:'iv', v:'sprint 24, Q2' },
+    ],
+    script: [
+      { cls:'t-cmd',  text:'/create-work-items',                      type:true, speed:50, delay:500 },
+      { cls:'t-blank',text:'', delay:120 },
+      { cls:'t-spin', text:'⠿ Connecting to Azure DevOps...',         delay:350 },
+      { cls:'t-spin', text:'⠿ Analysing feature brief...',            delay:700 },
+      { cls:'t-spin', text:'⠿ Generating work item hierarchy...',     delay:700 },
+      { cls:'t-blank',text:'', delay:500 },
+      { cls:'t-ok',   text:'✓ Epic    #4821  SSO Authentication — Analytics Dashboard', delay:110 },
+      { cls:'t-ok',   text:'✓ Story   #4822  Implement Azure AD OAuth 2.0 flow',        delay:100 },
+      { cls:'t-ok',   text:'✓ Story   #4823  Add role-based access control',            delay:100 },
+      { cls:'t-ok',   text:'✓ Story   #4824  Audit logging via Application Insights',   delay:100 },
+      { cls:'t-ok',   text:'✓ 7 Tasks linked and assigned across stories',              delay:100 },
+      { cls:'t-blank',text:'', delay:80 },
+      { cls:'t-accent',text:'View in ADO  →  dev.azure.com/abi/analytics  →  #4821',   delay:220 },
+    ],
+  },
+  {
+    num: '05',
+    title: 'GitHub Actions & Standardized PRs',
+    desc: 'Describe your CI requirements → a ready-to-commit workflow YAML and a standardized PR description generated in one go.',
+    badge: '/gh-actions-workflow',
+    accentColor: 'var(--green)',
+    accentDim: 'rgba(34,197,94,0.10)',
+    inputFile: 'ci-requirements.txt',
+    inputIcon: '⚙️',
+    inputLines: [
+      { t:'iv', v:'ci pipeline for the repo' },
+      { t:'iv', v:'run tests on every PR' },
+      { t:'b' },
+      { t:'iv', v:'validate all skills with validate_skill.py' },
+      { t:'iv', v:'fail build if validator errors' },
+      { t:'iv', v:'maybe also lint the python files' },
+    ],
+    script: [
+      { cls:'t-cmd',  text:'/gh-actions-workflow',                    type:true, speed:50, delay:500 },
+      { cls:'t-blank',text:'', delay:120 },
+      { cls:'t-spin', text:'⠿ Reading repo structure...',             delay:350 },
+      { cls:'t-spin', text:'⠿ Generating workflow YAML...',           delay:800 },
+      { cls:'t-blank',text:'', delay:450 },
+      { cls:'t-ok',   text:'✓ .github/workflows/ci.yml',              delay:90 },
+      { cls:'t-body', text:'  on: pull_request',                      delay:55 },
+      { cls:'t-body', text:'  jobs: validate-skills · run-tests · lint-python', delay:55 },
+      { cls:'t-blank',text:'', delay:200 },
+      { cls:'t-spin', text:'⠿ Generating PR description for this change...', delay:350 },
+      { cls:'t-blank',text:'', delay:700 },
+      { cls:'t-h1',   text:'## Summary',                              delay:70 },
+      { cls:'t-body', text:'Adds CI pipeline to validate skills and run tests', delay:55 },
+      { cls:'t-body', text:'automatically on every pull request.',    delay:45 },
+      { cls:'t-h1',   text:'## Test Plan',                            delay:60 },
+      { cls:'t-body', text:'- [ ] Pipeline passes on test branch',    delay:55 },
+      { cls:'t-body', text:'- [ ] Validator catches malformed SKILL.md', delay:55 },
+      { cls:'t-blank',text:'', delay:70 },
+      { cls:'t-accent',text:'PR description ready · standardized for the team', delay:200 },
+    ],
+  },
+  {
+    num: '06',
+    title: 'Calendar Invites & Emails via Outlook / Teams',
+    desc: 'A few casual lines → recurring calendar invite created, status email drafted, ready to send with one confirmation.',
+    badge: '/email-draft',
+    accentColor: 'var(--pink)',
+    accentDim: 'rgba(244,114,182,0.10)',
+    inputFile: 'message-brief.txt',
+    inputIcon: '📧',
+    inputLines: [
+      { t:'iv', v:'set up a weekly review for the watchtower project' },
+      { t:'iv', v:'fridays 3pm, 30 min' },
+      { t:'iv', v:'kartik krishna snimar' },
+      { t:'b' },
+      { t:'iv', v:'also send a quick update -' },
+      { t:'iv', v:'pipeline stable, heading to prod review next sprint' },
+    ],
+    script: [
+      { cls:'t-cmd',  text:'/email-draft',                            type:true, speed:50, delay:500 },
+      { cls:'t-blank',text:'', delay:120 },
+      { cls:'t-spin', text:'⠿ Connecting to Microsoft Graph...',      delay:400 },
+      { cls:'t-spin', text:'⠿ Creating calendar event...',            delay:800 },
+      { cls:'t-spin', text:'⠿ Drafting status email...',              delay:700 },
+      { cls:'t-blank',text:'', delay:450 },
+      { cls:'t-ok',   text:'✓ Calendar: "Watchtower Weekly Review"',  delay:90 },
+      { cls:'t-body', text:'  Every Friday · 15:00–15:30 · Recurring', delay:55 },
+      { cls:'t-body', text:'  Invitees: Kartik S, Krishna M, Snimar A', delay:55 },
+      { cls:'t-blank',text:'', delay:70 },
+      { cls:'t-ok',   text:'✓ Email drafted:',                        delay:90 },
+      { cls:'t-body', text:'  To: Kartik S, Krishna M, Snimar A',     delay:55 },
+      { cls:'t-body', text:'  Subject: Watchtower Sync + Status Update', delay:55 },
+      { cls:'t-body', text:'  "Pipeline is stable, moving to prod review', delay:55 },
+      { cls:'t-body', text:'   next sprint. Weekly sync invite attached."', delay:45 },
+      { cls:'t-blank',text:'', delay:80 },
+      { cls:'t-accent',text:'Send email + calendar invite? (y to confirm)', delay:200 },
+    ],
+  },
+];
+
+// ── RENDER CARDS ─────────────────────────────────────────────────────────────
+function buildInputLines(lines) {
+  return lines.map(l => {
+    if (l.t === 'b') return `<span class="ib"></span>`;
+    return `<span class="${l.t === 'ik' ? 'ik' : 'iv'}">${l.v}</span>`;
+  }).join('\n');
+}
+
+function buildCard(d, idx) {
+  return `
+  <div class="demo-card" id="demo-${idx}" style="--card-accent:${d.accentColor}; --card-accent-dim:${d.accentDim}">
+    <div class="demo-card-header">
+      <div class="demo-card-num">${d.num}</div>
+      <div class="demo-card-text">
+        <div class="demo-card-title">${d.title}</div>
+        <div class="demo-card-desc">${d.desc}</div>
+      </div>
+      <div class="demo-card-badge">${d.badge}</div>
+    </div>
+    <div class="demo-card-body">
+      <div class="input-pane">
+        <div class="pane-bar">
+          <span style="font-size:0.8rem">${d.inputIcon}</span>
+          <span class="pane-bar-title">${d.inputFile}</span>
+          <span class="pane-bar-label">Your input</span>
+        </div>
+        <div class="input-content">${buildInputLines(d.inputLines)}</div>
+      </div>
+      <div class="terminal-pane">
+        <div class="term-bar">
+          <div class="term-dot td-r"></div>
+          <div class="term-dot td-y"></div>
+          <div class="term-dot td-g"></div>
+          <div class="term-title">Claude Code — VS Code Terminal</div>
+          <button class="term-replay" data-demo="${idx}">↺ replay</button>
+        </div>
+        <div class="term-body" id="term-${idx}"></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('demos').innerHTML = demoMeta.map(buildCard).join('');
+
+// ── ENGINE ────────────────────────────────────────────────────────────────────
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function runDemo(idx) {
+  const container = document.getElementById('term-' + idx);
+  container.innerHTML = '';
+  for (const step of demoMeta[idx].script) {
+    await sleep(step.delay || 0);
+    const el = document.createElement('div');
+    el.className = 'tl ' + step.cls;
+    container.appendChild(el);
+    if (step.type) {
+      const cursor = document.createElement('span');
+      cursor.className = 'cursor';
+      el.appendChild(cursor);
+      for (const ch of step.text) {
+        cursor.insertAdjacentText('beforebegin', ch);
+        await sleep(step.speed || 55);
+      }
+      cursor.remove();
+    } else {
+      el.textContent = step.text;
+    }
+    container.scrollTop = container.scrollHeight;
+  }
+}
+
+// ── SCROLL AUTOPLAY ───────────────────────────────────────────────────────────
+const played = new Set();
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const card = entry.target;
+    const idx = Number(card.id.replace('demo-', ''));
+    card.classList.add('visible');
+    if (!played.has(idx)) {
+      played.add(idx);
+      setTimeout(() => runDemo(idx), 300);
+    }
+    obs.unobserve(card);
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.demo-card').forEach(c => obs.observe(c));
+
+// ── REPLAY ────────────────────────────────────────────────────────────────────
+document.getElementById('demos').addEventListener('click', e => {
+  const btn = e.target.closest('.term-replay');
+  if (btn) runDemo(Number(btn.dataset.demo));
+});
+</script>
+</body>
+</html>
